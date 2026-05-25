@@ -1,0 +1,42 @@
+## .gitignore for ASP.NET Core / KurusMatik project
+
+# Build klasörleri
+bin/
+obj/
+
+# Visual Studio dosyaları
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider IDE dosyaları
+.idea/
+
+# VS Code dosyaları
+.vscode/
+
+# NuGet paketleri - bunlar restore edilebilir, göndermeye gerek yok
+*.nupkg
+.nuget/
+
+# Runtime config
+appsettings.Development.json
+
+# Yayınlama klasörleri
+publish/
+wwwroot/lib/  # Client-side kütüphaneler ayrı yönetilir
+
+# Kullanıcıya özel ayarlar
+*.local.json
+
+# Geçici dosyalar
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Log dosyaları
+logs/
+*.log
