@@ -1,0 +1,147 @@
+@* ============================================================
+   _Layout.cshtml - KuruşMatik Ana Şablon
+   Bütün sayfalar bu şablonu kullanıyor. Windows XP'nin
+   görev çubuğunu ve Start menüsünü Razor ile yazdım.
+   Taskbar'daki bakiye, Geliştirici 1'in AJAX endpoint'i
+   üzerinden anlık geliyor.
+   ============================================================ *@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - KuruşMatik</title>
+
+    @* XP CSS *@
+    <link rel="stylesheet" href="~/css/xp.css" />
+
+    @* Font Awesome ikonlar için *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+@* ==========================================
+   MASAÜSTÜ İÇERİK ALANI
+   ========================================== *@
+<div class="xp-desktop-area">
+
+    @* TempData mesajlarını JavaScript değişkeni olarak aktarıyorum *@
+    @if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null || TempData["WarningMessage"] != null)
+    {
+        <script>
+            window.xpMessages = {
+                success: '@TempData["SuccessMessage"]',
+                error:   '@TempData["ErrorMessage"]',
+                warning: '@TempData["WarningMessage"]'
+            };
+            // Boş stringleri null yap
+            Object.keys(window.xpMessages).forEach(k => {
+                if (!window.xpMessages[k]) window.xpMessages[k] = null;
+            });
+        </script>
+    }
+
+    @RenderBody()
+</div>
+
+@* ==========================================
+   WINDOWS XP TASKBAR (Görev Çubuğu)
+   Sayfanın en altına yapışık kalıyor, fixed position
+   ========================================== *@
+<div class="xp-taskbar">
+
+    @* --- START BUTONU --- *@
+    <button class="xp-start-btn" id="xp-start-btn" type="button">
+        <span class="start-logo"><span>⊞</span></span>
+        <span>Başlat</span>
+    </button>
+
+    @* --- NAVİGASYON BUTONCUKLARI (Açık pencereler gibi) --- *@
+    <div class="taskbar-nav">
+        <a href="/Dashboard" class="taskbar-nav-btn @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+            🏠 Dashboard
+        </a>
+        <a href="/Transaction" class="taskbar-nav-btn @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transaction" ? "active" : "")">
+            💸 İşlemler
+        </a>
+        <a href="/BudgetGoal" class="taskbar-nav-btn @(ViewContext.RouteData.Values["controller"]?.ToString() == "BudgetGoal" ? "active" : "")">
+            🎯 Bütçe Hedefleri
+        </a>
+        <a href="/Report" class="taskbar-nav-btn @(ViewContext.RouteData.Values["controller"]?.ToString() == "Report" ? "active" : "")">
+            📊 Raporlar
+        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="/Admin" class="taskbar-nav-btn @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")">
+                🔧 Yönetim
+            </a>
+        }
+    </div>
+
+    @* --- BAKIYE GÖSTERGESİ (AJAX ile canlı güncelleniyor) --- *@
+    <div class="taskbar-balance" title="Bu ayki bakiye (otomatik güncellenir)">
+        <span class="balance-label">Bakiye:</span>
+        <span id="taskbar-balance-amount">Yükleniyor...</span>
+    </div>
+
+    @* --- SAAT --- *@
+    <div class="taskbar-clock" id="taskbar-time">--:--</div>
+</div>
+
+@* ==========================================
+   START MENÜSÜ (Başlat > menüsü)
+   ========================================== *@
+<div class="xp-start-menu" id="xp-start-menu">
+    <div class="xp-start-menu-header">
+        <div class="user-avatar">👤</div>
+        <div>
+            <strong>@User.Identity?.Name?.Split('@')[0]</strong><br />
+            <span style="font-size:10px; opacity:0.8;">KuruşMatik Kullanıcısı</span>
+        </div>
+    </div>
+    <div class="xp-start-menu-body">
+        <div class="xp-start-menu-left">
+            <a href="/Dashboard" class="xp-start-menu-item">
+                <span class="menu-icon">🏠</span> Dashboard
+            </a>
+            <a href="/Transaction/Create" class="xp-start-menu-item">
+                <span class="menu-icon">➕</span> Yeni İşlem
+            </a>
+            <a href="/BudgetGoal/Create" class="xp-start-menu-item">
+                <span class="menu-icon">🎯</span> Bütçe Hedefi Ekle
+            </a>
+            <a href="/Report" class="xp-start-menu-item">
+                <span class="menu-icon">📊</span> Excel Raporu
+            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="xp-start-menu-divider"></div>
+                <a href="/Admin" class="xp-start-menu-item">
+                    <span class="menu-icon">🔧</span> Admin Paneli
+                </a>
+            }
+            <div class="xp-start-menu-divider"></div>
+        </div>
+    </div>
+    <div class="xp-start-menu-footer">
+        <form method="post" action="/Account/Logout" style="display:inline;">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="xp-btn xp-btn-danger" style="height:22px; font-size:10px; padding: 0 10px;">
+                🔴 Kapat / Çıkış
+            </button>
+        </form>
+    </div>
+</div>
+
+@* ==========================================
+   JAVASCRIPT
+   ========================================== *@
+<script src="~/js/xp.js"></script>
+@* Chart.js CDN *@
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+@RenderSection("Scripts", required: false)
+</body>
+</html>

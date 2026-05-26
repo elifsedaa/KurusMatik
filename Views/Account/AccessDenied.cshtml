@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Erişim Reddedildi";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>Erişim Reddedildi - KuruşMatik</title>
+    <link rel="stylesheet" href="~/css/xp.css" />
+</head>
+<body>
+<div class="xp-login-desktop">
+    <div class="xp-login-window" style="width:360px;">
+        <div class="xp-titlebar" style="background:linear-gradient(to bottom,#E87070,#C02020);">
+            <span class="xp-titlebar-icon">🚫</span>
+            <span class="xp-titlebar-text">Erişim Reddedildi</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body" style="padding:20px; text-align:center;">
+            <div style="font-size:48px; margin-bottom:12px;">🚫</div>
+            <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">Bu alana erişim yetkiniz yok!</div>
+            <div style="font-size:11px; color:#666; margin-bottom:16px;">
+                Bu sayfaya erişmek için gerekli role sahip değilsiniz.
+            </div>
+            <a href="/Dashboard" class="xp-btn xp-btn-primary">🏠 Dashboard'a Dön</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

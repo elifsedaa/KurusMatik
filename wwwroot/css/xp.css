@@ -1,0 +1,673 @@
+/* ============================================================
+   KuruşMatik - Windows XP Luna Teması
+   Geliştirici 2: Bu dosyada tüm XP stillerini bir araya
+   topladım. Renkleri ve gölgeleri XP'nin Luna temasından
+   birebir çektim, eski screenshot'lara bakarak yazdım.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&display=swap');
+
+/* --- CSS Değişkenleri: XP Luna renk paleti --- */
+:root {
+    --xp-blue-dark:    #003C74;
+    --xp-blue-mid:     #0558A4;
+    --xp-blue-light:   #1F7BE0;
+    --xp-blue-bright:  #3A9FED;
+    --xp-taskbar-bg:   #245EDC;
+    --xp-taskbar-top:  #3C81E8;
+    --xp-start-green:  #3A8237;
+    --xp-start-green2: #5BB84D;
+    --xp-win-bg:       #ECE9D8;   /* XP'nin o meşhur bej/krem ekran rengi */
+    --xp-win-chrome:   #0058E6;
+    --xp-title-text:   #FFFFFF;
+    --xp-border-out:   #848284;
+    --xp-border-in:    #D4D0C8;
+    --xp-btn-face:     #ECE9D8;
+    --xp-btn-shadow:   #ACA899;
+    --xp-btn-light:    #FFFFFF;
+    --xp-text:         #000000;
+    --xp-red:          #E51400;
+    --xp-green:        #3A8237;
+    --xp-yellow:       #E8A900;
+    --xp-link:         #0000FF;
+    --xp-selection:    #316AC5;
+    --xp-desktop:      #3A6EA5;  /* klasik XP masaüstü mavi tonu */
+}
+
+/* --- Genel Sıfırlama --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    height: 100%;
+    font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+    font-size: 11px;
+    color: var(--xp-text);
+    background: var(--xp-desktop);
+    /* XP masaüstü dokusu için hafif bir pattern */
+    background-image: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='2' height='2' fill='%234080B8' opacity='0.3'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   TASKBAR (Görev Çubuğu)
+   ============================================================ */
+.xp-taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    z-index: 9999;
+    background: linear-gradient(to bottom, var(--xp-taskbar-top) 0%, var(--xp-taskbar-bg) 50%, #1A4CB5 100%);
+    border-top: 1px solid #5C8CE8;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 2px;
+    box-shadow: 0 -1px 0 #0D3A9E;
+}
+
+/* Start Butonu */
+.xp-start-btn {
+    height: 26px;
+    padding: 0 8px 0 4px;
+    background: linear-gradient(to bottom, var(--xp-start-green2) 0%, var(--xp-start-green) 45%, #2A6A27 100%);
+    border: none;
+    border-radius: 0 12px 12px 0;
+    color: white;
+    font-family: 'Tahoma', sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 1px 0 3px rgba(0,0,0,0.4);
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    position: relative;
+    margin-right: 4px;
+}
+.xp-start-btn:hover {
+    background: linear-gradient(to bottom, #6CC45E 0%, #4A9A47 45%, #357332 100%);
+    color: white;
+    text-decoration: none;
+}
+.xp-start-btn .start-logo {
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.xp-start-btn .start-logo span {
+    font-size: 10px;
+    line-height: 1;
+    color: var(--xp-start-green);
+}
+
+/* Start menüsü dropdown */
+.xp-start-menu {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    width: 260px;
+    background: white;
+    border: 1px solid #888;
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.5);
+    display: none;
+    z-index: 10000;
+}
+.xp-start-menu.open { display: block; }
+.xp-start-menu-header {
+    background: linear-gradient(to right, var(--xp-blue-dark), var(--xp-blue-light));
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+}
+.xp-start-menu-header .user-avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--xp-win-bg);
+    border: 2px solid white;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+.xp-start-menu-header strong { font-size: 12px; font-weight: bold; }
+.xp-start-menu-body { display: flex; }
+.xp-start-menu-left {
+    flex: 1;
+    border-right: 1px solid #DDD;
+    padding: 4px 0;
+}
+.xp-start-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+    font-size: 11px;
+}
+.xp-start-menu-item:hover {
+    background: var(--xp-selection);
+    color: white;
+    text-decoration: none;
+}
+.xp-start-menu-item .menu-icon { font-size: 16px; width: 20px; text-align: center; }
+.xp-start-menu-divider { border-top: 1px solid #DDD; margin: 4px 0; }
+.xp-start-menu-footer {
+    background: var(--xp-win-bg);
+    border-top: 1px solid #DDD;
+    padding: 4px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+/* Taskbar'daki bakiye göstergesi */
+.taskbar-balance {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    height: 24px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 3px;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+}
+.taskbar-balance .balance-label { color: #B8D4FF; font-weight: normal; font-size: 10px; }
+.taskbar-balance #taskbar-balance-amount { color: #90EE90; }
+.taskbar-balance #taskbar-balance-amount.negative { color: #FF8080; }
+
+/* Saat */
+.taskbar-clock {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 3px;
+    padding: 0 8px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    min-width: 55px;
+    justify-content: center;
+}
+
+/* Taskbar nav butonları */
+.taskbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    flex: 1;
+    overflow: hidden;
+}
+.taskbar-nav-btn {
+    height: 22px;
+    padding: 0 8px;
+    background: linear-gradient(to bottom, #5990E8 0%, #3A72CC 50%, #2860B8 100%);
+    border: 1px solid #1A50A0;
+    border-radius: 2px;
+    color: white;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 10px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+.taskbar-nav-btn:hover, .taskbar-nav-btn.active {
+    background: linear-gradient(to bottom, #3A72CC 0%, #5990E8 50%, #4A80D8 100%);
+    color: white;
+    text-decoration: none;
+}
+
+/* ============================================================
+   XP PENCERE ÇERÇEVESİ (Window Chrome)
+   ============================================================ */
+.xp-window {
+    background: var(--xp-win-bg);
+    border: 1px solid var(--xp-border-out);
+    box-shadow: 2px 2px 0 #FFF inset, -1px -1px 0 #ACA899 inset, 3px 3px 8px rgba(0,0,0,0.4);
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.xp-titlebar {
+    height: 28px;
+    background: linear-gradient(to bottom, #4A9EE8 0%, #0558A4 8%, #0C5AC4 15%, #1768D4 50%, #0558A4 85%, #0346A0 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    gap: 6px;
+    border-radius: 6px 6px 0 0;
+}
+.xp-titlebar-icon { font-size: 14px; }
+.xp-titlebar-text {
+    flex: 1;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.xp-titlebar-buttons { display: flex; gap: 2px; margin-left: auto; }
+.xp-win-btn {
+    width: 21px;
+    height: 21px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.3);
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-family: 'Marlett', 'Wingdings', sans-serif;
+}
+.xp-win-btn-min { background: linear-gradient(to bottom, #FCFCFA, #D4D0C8); }
+.xp-win-btn-max { background: linear-gradient(to bottom, #FCFCFA, #D4D0C8); }
+.xp-win-btn-close { background: linear-gradient(to bottom, #F08080, #CC2020); color: white; }
+.xp-win-btn:hover { filter: brightness(1.15); }
+
+.xp-window-body {
+    padding: 12px;
+}
+
+/* ============================================================
+   XP BUTONLARI
+   ============================================================ */
+.xp-btn {
+    padding: 3px 14px;
+    min-width: 75px;
+    height: 23px;
+    background: linear-gradient(to bottom, #FFFFFF 0%, #ECE9D8 50%, #D4D0C8 100%);
+    border: 1px solid var(--xp-border-out);
+    border-radius: 3px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
+    color: black;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+.xp-btn:hover {
+    background: linear-gradient(to bottom, #EEF4FF, #C8DCFC 50%, #B0CCFA);
+    border-color: #316AC5;
+    color: black;
+    text-decoration: none;
+}
+.xp-btn:active {
+    background: linear-gradient(to bottom, #C0D4F8, #D4E4FC);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+}
+.xp-btn-primary {
+    background: linear-gradient(to bottom, #5090E8 0%, #1862CC 50%, #0E52B8 100%);
+    color: white;
+    border-color: #0038A0;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+}
+.xp-btn-primary:hover {
+    background: linear-gradient(to bottom, #70AAEE, #2878E0 50%, #1A68D0);
+    color: white;
+    border-color: #0048C0;
+}
+.xp-btn-danger {
+    background: linear-gradient(to bottom, #E88080, #CC2020 50%, #B01818);
+    color: white;
+    border-color: #901010;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+}
+.xp-btn-danger:hover { filter: brightness(1.1); color: white; }
+.xp-btn-success {
+    background: linear-gradient(to bottom, #60C850, #3A8030 50%, #2A6820);
+    color: white;
+    border-color: #1A5010;
+}
+.xp-btn-success:hover { filter: brightness(1.1); color: white; }
+
+/* ============================================================
+   FORM ELEMANLARI
+   ============================================================ */
+.xp-input, .xp-select, .xp-textarea {
+    height: 22px;
+    padding: 2px 4px;
+    background: white;
+    border: 1px solid #7F9DB9;
+    border-radius: 0;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    outline: none;
+    width: 100%;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.15);
+}
+.xp-input:focus, .xp-select:focus { border-color: #316AC5; box-shadow: inset 0 0 0 1px #316AC5; }
+.xp-textarea { height: auto; min-height: 60px; resize: vertical; }
+.xp-input.is-invalid, .xp-select.is-invalid { border-color: red; background: #FFF0F0; }
+
+.xp-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.xp-form-group { margin-bottom: 10px; }
+.xp-field-error { color: red; font-size: 10px; margin-top: 2px; display: block; }
+
+/* ============================================================
+   GROUPBOX (XP'nin kutu içi gruplama elemanı)
+   ============================================================ */
+.xp-groupbox {
+    border: 1px solid var(--xp-border-out);
+    border-radius: 3px;
+    padding: 12px 10px 8px;
+    margin-bottom: 12px;
+    position: relative;
+    background: var(--xp-win-bg);
+}
+.xp-groupbox-title {
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: var(--xp-win-bg);
+    padding: 0 4px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+/* ============================================================
+   TABLO
+   ============================================================ */
+.xp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+.xp-table thead tr {
+    background: linear-gradient(to bottom, var(--xp-blue-light), var(--xp-blue-mid));
+    color: white;
+}
+.xp-table thead th {
+    padding: 4px 8px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 11px;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    white-space: nowrap;
+}
+.xp-table tbody tr { background: white; }
+.xp-table tbody tr:nth-child(even) { background: #F5F3ED; }
+.xp-table tbody tr:hover { background: #C8DCFC; cursor: default; }
+.xp-table tbody td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #D4D0C8;
+    border-right: 1px solid #D4D0C8;
+    font-size: 11px;
+}
+
+/* ============================================================
+   STAT KUTULARI (Dashboard özet kartları)
+   ============================================================ */
+.xp-stat-card {
+    background: var(--xp-win-bg);
+    border: 1px solid var(--xp-border-out);
+    box-shadow: inset 0 1px 0 white;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+}
+.xp-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+.xp-stat-card.income::before { background: var(--xp-green); }
+.xp-stat-card.expense::before { background: var(--xp-red); }
+.xp-stat-card.balance::before { background: var(--xp-blue-mid); }
+.xp-stat-label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.xp-stat-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--xp-text);
+    font-variant-numeric: tabular-nums;
+}
+.xp-stat-value.positive { color: var(--xp-green); }
+.xp-stat-value.negative { color: var(--xp-red); }
+.xp-stat-icon { font-size: 28px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.15; }
+
+/* ============================================================
+   PROGRESS BAR (XP tarzı)
+   ============================================================ */
+.xp-progress {
+    height: 16px;
+    background: white;
+    border: 1px solid #7F9DB9;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+}
+.xp-progress-bar {
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        #5BCFFF 0%,
+        #3BA4D8 40%,
+        #2080C0 50%,
+        #3BA4D8 60%,
+        #5BCFFF 100%
+    );
+    /* XP'nin o klasik canlı mavi dolgu çubuğu */
+    background-size: 20px 100%;
+    transition: width 0.6s ease;
+    position: relative;
+}
+.xp-progress-bar.warning {
+    background: linear-gradient(to bottom, #FFD85C, #E8A900 50%, #FFD85C);
+}
+.xp-progress-bar.danger {
+    background: linear-gradient(to bottom, #FF6060, #CC2020 50%, #FF6060);
+}
+/* Bloğun içindeki ışıltılı çizgiler - XP'yi XP yapan detay */
+.xp-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: rgba(255,255,255,0.4);
+}
+
+/* ============================================================
+   BADGE ve ETİKETLER
+   ============================================================ */
+.xp-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 1px solid;
+    border-radius: 2px;
+}
+.xp-badge-income { background: #D4FFD4; color: #1A6A1A; border-color: #6AAA6A; }
+.xp-badge-expense { background: #FFD4D4; color: #8A1A1A; border-color: #AA6A6A; }
+.xp-badge-warning { background: #FFF4CC; color: #886600; border-color: #CCAA44; }
+
+/* ============================================================
+   AI COACH KUTUSU
+   ============================================================ */
+.xp-ai-coach {
+    border: 1px solid #7F9DB9;
+    background: linear-gradient(135deg, #EEF5FF 0%, #E8F0FC 100%);
+    padding: 10px 12px;
+    position: relative;
+    border-radius: 2px;
+}
+.xp-ai-coach-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--xp-blue-mid);
+    font-size: 12px;
+    border-bottom: 1px solid #C8D8F0;
+    padding-bottom: 6px;
+}
+.xp-ai-coach-header .robot-icon { font-size: 20px; }
+.xp-ai-coach-content {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #333;
+}
+.xp-ai-coach-content.loading { color: #666; font-style: italic; }
+.ai-typing-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 12px;
+    background: var(--xp-blue-mid);
+    animation: blink 0.8s infinite;
+    vertical-align: middle;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ============================================================
+   ANA İÇERİK ALANI
+   ============================================================ */
+.xp-desktop-area {
+    margin-bottom: 34px; /* taskbar için boşluk */
+    padding: 8px;
+    min-height: calc(100vh - 34px);
+}
+
+/* Scrollbar XP tarzı */
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track { background: var(--xp-win-bg); border: 1px solid #C8C4BC; }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #D0CCC4, #E8E4DC, #D0CCC4);
+    border: 1px solid #9C9890;
+}
+::-webkit-scrollbar-button { background: var(--xp-win-bg); border: 1px solid #9C9890; height: 16px; }
+
+/* ============================================================
+   ALERT/BİLDİRİM STILLERI
+   ============================================================ */
+.xp-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid;
+    margin-bottom: 8px;
+    font-size: 11px;
+}
+.xp-alert-info    { background: #EFF5FF; border-color: #7F9DB9; color: #003C74; }
+.xp-alert-success { background: #EFFFEF; border-color: #6AAA6A; color: #1A5A1A; }
+.xp-alert-warning { background: #FFFAEE; border-color: #CCAA44; color: #886600; }
+.xp-alert-danger  { background: #FFF0F0; border-color: #AA6A6A; color: #8A1A1A; }
+.xp-alert-icon    { font-size: 18px; flex-shrink: 0; }
+
+/* ============================================================
+   HIZLI İŞLEM PANELI (Quick Expense Panel)
+   ============================================================ */
+.xp-quick-panel {
+    background: linear-gradient(to bottom, #F5F3ED, var(--xp-win-bg));
+    border: 1px solid var(--xp-border-out);
+    box-shadow: inset 0 1px 0 white;
+}
+
+/* ============================================================
+   RESPONSIVE GRID YARDIMCILARI
+   Basit tutuyorum, Bootstrap'e gerek yok
+   ============================================================ */
+.xp-grid { display: grid; gap: 8px; }
+.xp-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.xp-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.xp-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.xp-grid-2-1 { grid-template-columns: 2fr 1fr; }
+.xp-grid-1-2 { grid-template-columns: 1fr 2fr; }
+.xp-flex { display: flex; gap: 8px; }
+.xp-flex-center { display: flex; align-items: center; gap: 8px; }
+.xp-flex-end { display: flex; justify-content: flex-end; gap: 8px; }
+.xp-flex-between { display: flex; justify-content: space-between; align-items: center; }
+.flex-1 { flex: 1; }
+
+@media (max-width: 768px) {
+    .xp-grid-4, .xp-grid-3, .xp-grid-2, .xp-grid-2-1, .xp-grid-1-2 {
+        grid-template-columns: 1fr;
+    }
+    .taskbar-nav { display: none; }
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.text-right  { text-align: right; }
+.text-center { text-align: center; }
+.text-bold   { font-weight: bold; }
+.text-green  { color: var(--xp-green); }
+.text-red    { color: var(--xp-red); }
+.text-blue   { color: var(--xp-blue-mid); }
+.text-muted  { color: #666; }
+.mb-0 { margin-bottom: 0 !important; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mt-8 { margin-top: 8px; }
+.p-8 { padding: 8px; }
+.w-100 { width: 100%; }
+.hidden { display: none !important; }
+
+/* Login/Register sayfaları için özel */
+.xp-login-desktop {
+    min-height: 100vh;
+    background: var(--xp-desktop);
+    background-image: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='2' height='2' fill='%234080B8' opacity='0.3'/%3E%3C/svg%3E");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+.xp-login-window {
+    width: 380px;
+    background: var(--xp-win-bg);
+    border: 1px solid var(--xp-border-out);
+    box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 1px 0 white;
+    border-radius: 6px 6px 0 0;
+}

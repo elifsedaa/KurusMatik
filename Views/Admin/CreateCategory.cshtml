@@ -1,0 +1,61 @@
+@* Admin/CreateCategory.cshtml *@
+@model KurusMatik.Models.Category
+@{
+    ViewData["Title"] = "Yeni Kategori";
+}
+
+<div style="max-width:460px; margin:0 auto;">
+    <div class="xp-window">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">➕</span>
+            <span class="xp-titlebar-text">Yeni Kategori Ekle</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close" onclick="location.href='/Admin/Categories'">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <form asp-action="CreateCategory" asp-controller="Admin" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Name">Kategori Adı <span style="color:red;">*</span></label>
+                    <input asp-for="Name" class="xp-input" placeholder="Örn: Yemek" />
+                    <span asp-validation-for="Name" class="xp-field-error"></span>
+                </div>
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Type">Tür <span style="color:red;">*</span></label>
+                    <select asp-for="Type" class="xp-select">
+                        <option value="0">💚 Gelir</option>
+                        <option value="1">❤️ Gider</option>
+                    </select>
+                </div>
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Description">Açıklama</label>
+                    <input asp-for="Description" class="xp-input" placeholder="İsteğe bağlı..." />
+                </div>
+
+                <div class="xp-grid xp-grid-2" style="gap:8px;">
+                    <div class="xp-form-group">
+                        <label class="xp-label" asp-for="ColorHex">Renk</label>
+                        <div style="display:flex; gap:4px; align-items:center;">
+                            <input asp-for="ColorHex" class="xp-input" type="color" style="width:40px; height:22px; padding:1px;" />
+                            <input asp-for="ColorHex" class="xp-input" placeholder="#6c757d" style="flex:1;" id="color-text" />
+                        </div>
+                    </div>
+                    <div class="xp-form-group">
+                        <label class="xp-label" asp-for="IconClass">İkon Sınıfı</label>
+                        <input asp-for="IconClass" class="xp-input" placeholder="fa-tag" />
+                        <span style="font-size:10px; color:#666;">Font Awesome sınıfı</span>
+                    </div>
+                </div>
+
+                <div class="xp-flex-end mt-8">
+                    <a href="/Admin/Categories" class="xp-btn">✖ İptal</a>
+                    <button type="submit" class="xp-btn xp-btn-primary">💾 Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

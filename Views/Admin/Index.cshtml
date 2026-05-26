@@ -1,0 +1,55 @@
+@* Admin/Index.cshtml - Admin Ana Sayfa *@
+@{
+    ViewData["Title"] = "Admin Paneli";
+    var stats = ViewBag.Stats;
+}
+
+<div class="xp-flex-between mb-8">
+    <div style="color:white; font-weight:bold; font-size:13px; text-shadow:1px 1px 2px rgba(0,0,0,.5);">
+        🔧 Admin Paneli
+    </div>
+</div>
+
+<div class="xp-grid xp-grid-4 mb-8">
+    <div class="xp-stat-card">
+        <div class="xp-stat-label">TOPLAM KATEGORİ</div>
+        <div class="xp-stat-value">@stats?.TotalCategories</div>
+        <div class="xp-stat-icon">📂</div>
+    </div>
+    <div class="xp-stat-card income">
+        <div class="xp-stat-label">AKTİF KATEGORİ</div>
+        <div class="xp-stat-value positive">@stats?.ActiveCategories</div>
+        <div class="xp-stat-icon">✅</div>
+    </div>
+    <div class="xp-stat-card">
+        <div class="xp-stat-label">TOPLAM İŞLEM</div>
+        <div class="xp-stat-value">@stats?.TotalTransactions</div>
+        <div class="xp-stat-icon">💸</div>
+    </div>
+    <div class="xp-stat-card">
+        <div class="xp-stat-label">AKTİF BÜTÇE HEDEFİ</div>
+        <div class="xp-stat-value">@stats?.TotalBudgetGoals</div>
+        <div class="xp-stat-icon">🎯</div>
+    </div>
+</div>
+
+<div class="xp-window">
+    <div class="xp-titlebar">
+        <span class="xp-titlebar-icon">🔧</span>
+        <span class="xp-titlebar-text">Admin Araçları</span>
+        <div class="xp-titlebar-buttons"><div class="xp-win-btn xp-win-btn-close">✕</div></div>
+    </div>
+    <div class="xp-window-body">
+        <div class="xp-grid xp-grid-3" style="gap:8px;">
+            <a href="/Admin/Categories" class="xp-btn" style="height:40px; flex-direction:column; gap:2px; font-size:12px;">
+                <span style="font-size:20px;">📂</span>Kategorileri Yönet
+            </a>
+            <a href="/Admin/CreateCategory" class="xp-btn xp-btn-success" style="height:40px; flex-direction:column; gap:2px; font-size:12px;">
+                <span style="font-size:20px;">➕</span>Yeni Kategori
+            </a>
+            <a href="/Dashboard" class="xp-btn xp-btn-primary" style="height:40px; flex-direction:column; gap:2px; font-size:12px;">
+                <span style="font-size:20px;">🏠</span>Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+</div>

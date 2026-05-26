@@ -1,0 +1,149 @@
+@removeTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+    
+    @* ============================================================
+    Transaction/Index.cshtml - İşlem Listesi
+    Geliştirici 1'in TransactionFilterViewModel'ini kullanıyorum.
+    Silme işlemini AJAX ile yaptım, tablo satırı kaybolsun.
+    ============================================================ *@
+@model KurusMatik.ViewModels.TransactionFilterViewModel
+@{
+    ViewData["Title"] = "İşlemler";
+}
+
+@* CSRF token'ı AJAX için gizli input olarak koy *@
+@Html.AntiForgeryToken()
+
+<div class="xp-window mb-8">
+    <div class="xp-titlebar">
+        <span class="xp-titlebar-icon">🔍</span>
+        <span class="xp-titlebar-text">İşlem Filtrele</span>
+        <div class="xp-titlebar-buttons">
+            <div class="xp-win-btn xp-win-btn-close">✕</div>
+        </div>
+    </div>
+    <div class="xp-window-body">
+        <form method="get" action="/Transaction">
+            <div class="xp-grid xp-grid-4" style="gap:8px; align-items:end;">
+                <div class="xp-form-group mb-0">
+                    <label class="xp-label">Kategori</label>
+                    <select name="CategoryId" class="xp-select">
+                        <option value="">— Tümü —</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                        <option value="@cat.Id" @(Model.CategoryId == cat.Id ? "selected" : "")>
+                            @cat.Name (@cat.Type)
+                        </option>
+                        }
+                    </select>
+                </div>
+                <div class="xp-form-group mb-0">
+                    <label class="xp-label">Başlangıç</label>
+                    <input name="StartDate" type="date" class="xp-input"
+                           value="@Model.StartDate?.ToString(" yyyy-MM-dd")" />
+                </div>
+                <div class="xp-form-group mb-0">
+                    <label class="xp-label">Bitiş</label>
+                    <input name="EndDate" type="date" class="xp-input"
+                           value="@Model.EndDate?.ToString(" yyyy-MM-dd")" />
+                </div>
+                <div class="xp-form-group mb-0">
+                    <label class="xp-label">Tür</label>
+                    <select name="Type" class="xp-select">
+                        <option value="">— Tümü —</option>
+                        <option value="0" @(Model.Type == CategoryType.Gelir ? "selected" : "")>Gelir</option>
+                        <option value="1" @(Model.Type == CategoryType.Gider ? "selected" : "")>Gider</option>
+                    </select>
+                </div>
+            </div>
+            <div class="xp-grid xp-grid-2" style="gap:8px; align-items:end; margin-top:8px;">
+                <div class="xp-form-group mb-0">
+                    <label class="xp-label">Açıklamada Ara</label>
+                    <input name="SearchTerm" class="xp-input" placeholder="Arama terimi..."
+                           value="@Model.SearchTerm" />
+                </div>
+                <div class="xp-flex-end">
+                    <a href="/Transaction" class="xp-btn">✖ Temizle</a>
+                    <button type="submit" class="xp-btn xp-btn-primary">🔍 Filtrele</button>
+                    <a href="/Transaction/Create" class="xp-btn xp-btn-success">➕ Yeni İşlem</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="xp-window">
+    <div class="xp-titlebar">
+        <span class="xp-titlebar-icon">💸</span>
+        <span class="xp-titlebar-text">
+            İşlemler — @Model.Transactions.Count kayıt
+            @if (Model.Transactions.Any())
+            {
+            <span style="opacity:.7; font-weight:normal;">
+                | Toplam Gider: @Model.FilteredTotal.ToString("N2") ₺
+            </span>
+            }
+        </span>
+        <div class="xp-titlebar-buttons">
+            <a href="/Report" class="xp-btn" style="height:18px; font-size:10px; padding:0 8px; margin-right:4px;">📊 Excel</a>
+            <div class="xp-win-btn xp-win-btn-close">✕</div>
+        </div>
+    </div>
+    <div class="xp-window-body" style="padding:0;">
+        @if (Model.Transactions.Any())
+        {
+        <table class="xp-table" id="transaction-table">
+            <thead>
+                <tr>
+                    <th style="width:90px;">Tarih</th>
+                    <th>Kategori</th>
+                    <th>Açıklama</th>
+                    <th style="width:120px; text-align:right;">Tutar</th>
+                    <th style="width:60px;">Tür</th>
+                    <th style="width:80px; text-align:center;">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Transactions)
+                    {
+                <tr id="tr-@t.Id">
+                    <td style="color:#666; font-size:10px;">@t.Date.ToString("dd.MM.yyyy")</td>
+                    <td>
+                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%;
+                                             background:@t.Category?.ColorHex; margin-right:4px;"></span>
+                        @t.Category?.Name
+                    </td>
+                    <td style="color:#666; font-size:10px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        @(t.Description ?? "—")
+                    </td>
+                    <td class="text-right text-bold @(t.Category?.Type == CategoryType.Gelir ? "text-green" : "text-red")">
+                        @(t.Category?.Type == CategoryType.Gelir ? "+" : "-")@t.Amount.ToString("N2") ₺
+                    </td>
+                    <td>
+                        <span class="xp-badge @(t.Category?.Type == CategoryType.Gelir ? "xp-badge-income" : "xp-badge-expense")">
+                            @(t.Category?.Type == CategoryType.Gelir ? "G+" : "G-")
+                        </span>
+                    </td>
+                    <td style="text-align:center;">
+                        <a href="/Transaction/Edit/@t.Id" class="xp-btn" style="height:18px; padding:0 6px; font-size:10px; min-width:auto;">✏️</a>
+                        <button onclick="deleteTransaction(@t.Id, this)"
+                                class="xp-btn xp-btn-danger" style="height:18px; padding:0 6px; font-size:10px; min-width:auto;">
+                            🗑
+                        </button>
+                    </td>
+                </tr>
+                    }
+            </tbody>
+        </table>
+        }
+        else
+        {
+        <div style="padding:24px; text-align:center; color:#666;">
+            <div style="font-size:32px; margin-bottom:8px;">📭</div>
+            <div>Filtre kriterlerine uyan işlem bulunamadı.</div>
+            <a href="/Transaction/Create" class="xp-btn xp-btn-primary" style="margin-top:8px; display:inline-block;">
+                ➕ İlk İşlemi Ekle
+            </a>
+        </div>
+        }
+    </div>
+</div>

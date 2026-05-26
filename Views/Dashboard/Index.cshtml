@@ -1,0 +1,473 @@
+@removeTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+    
+    @* ============================================================
+    Dashboard/Index.cshtml
+    Ana ekran. Geliştirici 1'in LINQ sorgularından gelen verileri
+    burada Chart.js ile görselleştirdim. AI Coach, bütçe uyarıları
+    ve hızlı işlem ekleme paneli de burada.
+    ============================================================ *@
+@model KurusMatik.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var turkishMonths = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                                 "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+}
+
+@* Grafik için verileri JSON'a çeviriyorum - Chart.js bunları alacak *@
+@section Scripts {
+    <script>
+// Geliştirici 1'in LINQ GroupBy verilerini JS'e aktarıyorum
+const categoryExpenseData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    Model.CategoryExpenses.Select(c => new {
+        categoryName = c.CategoryName,
+        totalAmount  = c.TotalAmount,
+        colorHex     = c.ColorHex,
+        percentage   = c.Percentage
+    })
+));
+
+const monthlyTrendData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    Model.MonthlyTrend.Select(m => new {
+        label   = m.MonthLabel,
+        income  = m.Income,
+        expense = m.Expense
+    })
+));
+
+// Sayfa yüklenince grafikleri çiz
+document.addEventListener('DOMContentLoaded', function () {
+    drawExpensePieChart();
+    drawTrendLineChart();
+
+    // AI Coach'u başlat - harcama verilerini gönderiyorum
+    loadAiCoach(
+        @Model.TotalIncome,
+        @Model.TotalExpense,
+        categoryExpenseData
+    );
+});
+
+// --- GİDER PASTA GRAFİĞİ ---
+function drawExpensePieChart() {
+    const ctx = document.getElementById('expensePieChart');
+    if (!ctx || categoryExpenseData.length === 0) return;
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryExpenseData.map(c => c.categoryName),
+            datasets: [{
+                data: categoryExpenseData.map(c => c.totalAmount),
+                backgroundColor: categoryExpenseData.map(c => c.colorHex),
+                borderColor: '#ECE9D8',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        font: { family: 'Tahoma', size: 10 },
+                        boxWidth: 12,
+                        padding: 8
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const d = categoryExpenseData[ctx.dataIndex];
+                            return ` ${d.categoryName}: ${d.totalAmount.toLocaleString('tr-TR')} ₺ (%${d.percentage})`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// --- AYLIK TREND ÇİZGİ GRAFİĞİ ---
+function drawTrendLineChart() {
+    const ctx = document.getElementById('trendLineChart');
+    if (!ctx || monthlyTrendData.length === 0) return;
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyTrendData.map(m => m.label),
+            datasets: [
+                {
+                    label: 'Gelir',
+                    data: monthlyTrendData.map(m => m.income),
+                    borderColor: '#3A8237',
+                    backgroundColor: 'rgba(58,130,55,0.1)',
+                    tension: 0.3,
+                    pointBackgroundColor: '#3A8237',
+                    pointRadius: 4
+                },
+                {
+                    label: 'Gider',
+                    data: monthlyTrendData.map(m => m.expense),
+                    borderColor: '#E51400',
+                    backgroundColor: 'rgba(229,20,0,0.08)',
+                    tension: 0.3,
+                    pointBackgroundColor: '#E51400',
+                    pointRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { font: { family: 'Tahoma', size: 10 }, boxWidth: 14 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: { family: 'Tahoma', size: 10 },
+                        callback: v => v.toLocaleString('tr-TR') + ' ₺'
+                    },
+                    grid: { color: 'rgba(0,0,0,0.06)' }
+                },
+                x: { ticks: { font: { family: 'Tahoma', size: 10 } } }
+            }
+        }
+    });
+}
+
+// Hızlı işlem formunu gönder
+async function submitQuickForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('quick-transaction-form');
+    const amountInput = form.querySelector('[name="Amount"]');
+    const amount = parseFloat(amountInput.value);
+
+    if (isNaN(amount) || amount <= 0) {
+        xpNotify.error('⚠️ Tutar sıfırdan büyük olmalıdır!');
+        amountInput.style.border = '2px solid red';
+        amountInput.focus();
+        return;
+    }
+    amountInput.style.border = '';
+
+    const btn = form.querySelector('[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = '⏳ Kaydediliyor...';
+
+    try {
+        const token = form.querySelector('[name="__RequestVerificationToken"]').value;
+        const resp = await fetch('/Transaction/Create', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': token },
+            body: new FormData(form)
+        });
+
+        if (resp.ok || resp.redirected) {
+            xpNotify.success('✅ İşlem eklendi!');
+            form.reset();
+            setTimeout(() => { refreshBalance(); location.reload(); }, 1200);
+        } else {
+            xpNotify.error('Kayıt sırasında hata oluştu.');
+        }
+    } catch { xpNotify.error('Bağlantı hatası.'); }
+    finally { btn.disabled = false; btn.textContent = '💾 Kaydet'; }
+}
+    </script>
+}
+
+@* ==========================================
+    SAYFA İÇERİĞİ
+    ========================================== *@
+
+@* Ay filtresi *@
+<div class="xp-flex-between mb-8">
+    <div style="color:white; font-weight:bold; font-size:13px; text-shadow:1px 1px 2px rgba(0,0,0,.5);">
+        💰 KuruşMatik Dashboard
+    </div>
+    <form method="get" action="/Dashboard" style="display:flex; gap:4px; align-items:center;">
+        <select name="month" class="xp-select" style="width:100px;">
+            @for (int m = 1; m <= 12; m++)
+            {
+            <option value="@m" @(m == Model.SelectedMonth ? "selected" : "")>@turkishMonths[m]</option>
+            }
+        </select>
+        <select name="year" class="xp-select" style="width:70px;">
+            @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 3; y--)
+            {
+            <option value="@y" @(y == Model.SelectedYear ? "selected" : "")>@y</option>
+            }
+        </select>
+        <button type="submit" class="xp-btn xp-btn-primary" style="height:22px; padding:0 10px; font-size:10px;">🔍 Filtrele</button>
+    </form>
+</div>
+
+@* ==========================================
+    ÖZET KARTLAR (4'lü)
+    ========================================== *@
+<div class="xp-grid xp-grid-4 mb-8">
+
+    <div class="xp-stat-card income">
+        <div class="xp-stat-label">TOPLAM GELİR</div>
+        <div class="xp-stat-value positive">@Model.TotalIncome.ToString("N2") ₺</div>
+        <div style="font-size:10px; color:#666;">@turkishMonths[Model.SelectedMonth] @Model.SelectedYear</div>
+        <div class="xp-stat-icon">💚</div>
+    </div>
+
+    <div class="xp-stat-card expense">
+        <div class="xp-stat-label">TOPLAM GİDER</div>
+        <div class="xp-stat-value negative">@Model.TotalExpense.ToString("N2") ₺</div>
+        <div style="font-size:10px; color:#666;">@turkishMonths[Model.SelectedMonth] @Model.SelectedYear</div>
+        <div class="xp-stat-icon">❤️</div>
+    </div>
+
+    <div class="xp-stat-card balance">
+        <div class="xp-stat-label">NET BAKİYE</div>
+        <div class="xp-stat-value @(Model.CurrentBalance >= 0 ? "positive" : "negative")">
+            @Model.CurrentBalance.ToString("N2") ₺
+        </div>
+        <div style="font-size:10px; color:#666;">Gelir - Gider</div>
+        <div class="xp-stat-icon">💵</div>
+    </div>
+
+    <div class="xp-stat-card">
+        <div class="xp-stat-label">BÜTÇE UYARILARI</div>
+        <div class="xp-stat-value @(Model.BudgetAlerts.Any(a => a.IsExceeded) ? "negative" : "")">
+            @Model.BudgetAlerts.Count(a => a.IsExceeded) aşım
+        </div>
+        <div style="font-size:10px; color:#666;">@Model.BudgetAlerts.Count aktif hedef</div>
+        <div class="xp-stat-icon">🎯</div>
+    </div>
+</div>
+
+@* ==========================================
+    ANA İÇERİK: Grafikler + Hızlı Panel
+    ========================================== *@
+<div class="xp-grid xp-grid-2-1 mb-8">
+
+    @* SOL: Grafikler *@
+    <div>
+        @* Pasta Grafik *@
+        <div class="xp-window mb-8">
+            <div class="xp-titlebar">
+                <span class="xp-titlebar-icon">🥧</span>
+                <span class="xp-titlebar-text">Kategori Bazlı Harcama Dağılımı — @turkishMonths[Model.SelectedMonth]</span>
+                <div class="xp-titlebar-buttons">
+                    <div class="xp-win-btn xp-win-btn-min">_</div>
+                    <div class="xp-win-btn xp-win-btn-max">□</div>
+                    <div class="xp-win-btn xp-win-btn-close">✕</div>
+                </div>
+            </div>
+            <div class="xp-window-body" style="padding:10px;">
+                @if (Model.CategoryExpenses.Any())
+                {
+                <div style="height:220px; position:relative;">
+                    <canvas id="expensePieChart"></canvas>
+                </div>
+                }
+                else
+                {
+                <div class="xp-alert xp-alert-info">
+                    <span class="xp-alert-icon">ℹ️</span>
+                    <div>Bu ay için gider verisi bulunamadı.</div>
+                </div>
+                }
+            </div>
+        </div>
+
+        @* Trend Grafik *@
+        <div class="xp-window">
+            <div class="xp-titlebar">
+                <span class="xp-titlebar-icon">📈</span>
+                <span class="xp-titlebar-text">@Model.SelectedYear Yılı Gelir / Gider Trendi</span>
+                <div class="xp-titlebar-buttons">
+                    <div class="xp-win-btn xp-win-btn-close">✕</div>
+                </div>
+            </div>
+            <div class="xp-window-body">
+                <div style="height:180px; position:relative;">
+                    <canvas id="trendLineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* SAĞ: Hızlı İşlem + AI Coach + Bütçe Uyarıları *@
+    <div>
+
+        @* HIZLI İŞLEM EKLEME *@
+        <div class="xp-window mb-8">
+            <div class="xp-titlebar">
+                <span class="xp-titlebar-icon">➕</span>
+                <span class="xp-titlebar-text">Hızlı İşlem Ekle</span>
+                <div class="xp-titlebar-buttons">
+                    <div class="xp-win-btn xp-win-btn-close">✕</div>
+                </div>
+            </div>
+            <div class="xp-window-body">
+                <form id="quick-transaction-form" onsubmit="submitQuickForm(event)">
+                    @Html.AntiForgeryToken()
+                    <div class="xp-form-group">
+                        <label class="xp-label">Tutar (₺)</label>
+                        <input name="Amount" type="number" step="0.01" min="0.01"
+                               class="xp-input" placeholder="0.00" required />
+                    </div>
+                    <div class="xp-form-group">
+                        <label class="xp-label">Kategori</label>
+                        <select name="CategoryId" class="xp-select">
+                            @{
+                                // Kategori listesini son işlemlerden çekiyorum
+                                var cats = Model.RecentTransactions
+                                    .Select(t => t.Category)
+                                    .Where(c => c != null)
+                                    .GroupBy(c => c!.Id)
+                                    .Select(g => g.First())
+                                    .ToList();
+                            }
+                            @* Eğer son işlem yoksa en azından bir kategori seçeneği göster *@
+                            @if (!cats.Any())
+                            {
+                            <option value="">— Kategori seç —</option>
+                            }
+                            @foreach (var cat in cats)
+                            {
+                            <option value="@cat!.Id">@cat.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="xp-form-group">
+                        <label class="xp-label">Açıklama</label>
+                        <input name="Description" class="xp-input" placeholder="İsteğe bağlı..." />
+                    </div>
+                    <input name="Date" type="hidden" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <div class="xp-flex-end">
+                        <a href="/Transaction/Create" class="xp-btn" style="font-size:10px;">Detaylı Form</a>
+                        <button type="submit" class="xp-btn xp-btn-primary">💾 Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @* AI COACH *@
+        <div class="xp-window mb-8">
+            <div class="xp-titlebar" style="background: linear-gradient(to bottom, #7B5EA7, #4A2080);">
+                <span class="xp-titlebar-icon">🤖</span>
+                <span class="xp-titlebar-text">Yapay Zeka Finans Koçu</span>
+                <div class="xp-titlebar-buttons">
+                    <div class="xp-win-btn xp-win-btn-close">✕</div>
+                </div>
+            </div>
+            <div class="xp-window-body">
+                <div class="xp-ai-coach">
+                    <div class="xp-ai-coach-header">
+                        <span class="robot-icon">🤖</span>
+                        <span>KuruşMatik AI Koçu — @turkishMonths[Model.SelectedMonth] Analizi</span>
+                    </div>
+                    <div id="ai-coach-loading" class="xp-ai-coach-content loading" style="display:none;">
+                        ⏳ Harcamalarınız analiz ediliyor<span class="ai-typing-cursor"></span>
+                    </div>
+                    <div id="ai-coach-content" class="xp-ai-coach-content">
+                        Yükleniyor...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* BÜTÇE UYARILARI *@
+        @if (Model.BudgetAlerts.Any())
+        {
+        <div class="xp-window">
+            <div class="xp-titlebar" style="background: linear-gradient(to bottom, #E8A900, #A07000);">
+                <span class="xp-titlebar-icon">⚠️</span>
+                <span class="xp-titlebar-text">Bütçe Uyarıları (@Model.BudgetAlerts.Count)</span>
+                <div class="xp-titlebar-buttons">
+                    <div class="xp-win-btn xp-win-btn-close">✕</div>
+                </div>
+            </div>
+            <div class="xp-window-body" style="padding:8px;">
+                @foreach (var alert in Model.BudgetAlerts)
+                    {
+                <div style="margin-bottom:8px;">
+                    <div class="xp-flex-between mb-8" style="font-size:11px;">
+                        <span style="font-weight:bold;">@alert.CategoryName</span>
+                        <span class="xp-badge xp-badge-@(alert.IsExceeded ? "expense" : "warning")">
+                            %@alert.UsagePercentage.ToString("N0")
+                        </span>
+                    </div>
+                    <div class="xp-progress">
+                        <div class="xp-progress-bar @(alert.AlertLevel)"
+                             style="width: @Math.Min(100, alert.UsagePercentage)%;"></div>
+                    </div>
+                    <div style="font-size:10px; color:#666; margin-top:2px;">
+                        @alert.CurrentSpending.ToString("N2") ₺ / @alert.MonthlyLimit.ToString("N2") ₺
+                        @if (alert.IsExceeded)
+                                {
+                        <span style="color:red; font-weight:bold;"> (Limit aşıldı!)</span>
+                                }
+                    </div>
+                </div>
+                    }
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+@* ==========================================
+    SON İŞLEMLER TABLOSU
+    ========================================== *@
+<div class="xp-window">
+    <div class="xp-titlebar">
+        <span class="xp-titlebar-icon">📋</span>
+        <span class="xp-titlebar-text">Son İşlemler</span>
+        <div class="xp-titlebar-buttons">
+            <a href="/Transaction" class="xp-btn" style="height:18px; font-size:10px; padding:0 8px; margin-right:4px;">Tümünü Gör</a>
+            <div class="xp-win-btn xp-win-btn-close">✕</div>
+        </div>
+    </div>
+    <div class="xp-window-body" style="padding:0;">
+        @if (Model.RecentTransactions.Any())
+        {
+        <table class="xp-table">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Kategori</th>
+                    <th>Açıklama</th>
+                    <th class="text-right">Tutar</th>
+                    <th>Tür</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.RecentTransactions)
+                    {
+                <tr>
+                    <td>@t.Date.ToString("dd.MM.yyyy")</td>
+                    <td>@t.Category?.Name</td>
+                    <td style="color:#666;">@(t.Description ?? "—")</td>
+                    <td class="text-right text-bold @(t.Category?.Type == CategoryType.Gelir ? "text-green" : "text-red")">
+                        @(t.Category?.Type == CategoryType.Gelir ? "+" : "-")@t.Amount.ToString("N2") ₺
+                    </td>
+                    <td>
+                        <span class="xp-badge @(t.Category?.Type == CategoryType.Gelir ? "xp-badge-income" : "xp-badge-expense")">
+                            @(t.Category?.Type == CategoryType.Gelir ? "Gelir" : "Gider")
+                        </span>
+                    </td>
+                </tr>
+                    }
+            </tbody>
+        </table>
+        }
+        else
+        {
+        <div style="padding:16px; text-align:center; color:#666; font-size:11px;">
+            Bu ay için işlem bulunamadı. <a href="/Transaction/Create" style="color:var(--xp-link);">İlk işlemi ekle →</a>
+        </div>
+        }
+    </div>
+</div>

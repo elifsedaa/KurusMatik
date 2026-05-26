@@ -1,0 +1,129 @@
+@removeTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+    
+    @* ============================================================
+    Report/Index.cshtml - Excel Raporlama Sayfası
+    Geliştirici 1'in ExcelExportService endpoint'ini çağıran
+    buton burada. Kullanıcı ay/yıl seçip indirebilir.
+    ============================================================ *@
+@{
+    ViewData["Title"] = "Raporlar";
+    var currentMonth = DateTime.Now.Month;
+    var currentYear  = DateTime.Now.Year;
+    var turkishMonths = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                                 "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+}
+
+@if (TempData["WarningMessage"] != null)
+{
+<div class="xp-alert xp-alert-warning mb-8">
+    <span class="xp-alert-icon">⚠️</span>
+    <div>@TempData["WarningMessage"]</div>
+</div>
+}
+
+<div class="xp-grid xp-grid-2" style="max-width:800px; margin:0 auto; gap:8px;">
+
+    @* Excel İndirme Penceresi *@
+    <div class="xp-window">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">📊</span>
+            <span class="xp-titlebar-text">Excel Raporu İndir</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <div class="xp-alert xp-alert-info mb-8">
+                <span class="xp-alert-icon">ℹ️</span>
+                <div>
+                    Seçtiğiniz aya ait tüm işlemler renkli Excel dosyası olarak indirilir.
+                    Geliştirici 1'in EPPlus servisi kullanılmaktadır.
+                </div>
+            </div>
+
+            <form method="get" action="/Report/DownloadExcel">
+                <div class="xp-grid xp-grid-2" style="gap:8px; margin-bottom:12px;">
+                    <div class="xp-form-group mb-0">
+                        <label class="xp-label">Ay</label>
+                        <select name="month" class="xp-select">
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                            <option value="@m" @(m == currentMonth ? "selected" : "")>@turkishMonths[m]</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="xp-form-group mb-0">
+                        <label class="xp-label">Yıl</label>
+                        <select name="year" class="xp-select">
+                            @for (int y = currentYear; y >= currentYear - 3; y--)
+                            {
+                            <option value="@y">@y</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="xp-btn xp-btn-success w-100" style="height:28px; font-size:12px;">
+                    📥 Excel Dosyasını İndir (.xlsx)
+                </button>
+            </form>
+
+            @* Tüm aylar için hızlı butonlar *@
+            <div style="margin-top:12px; border-top:1px solid #D4D0C8; padding-top:10px;">
+                <div class="xp-label mb-8">Hızlı İndir — @currentYear</div>
+                <div class="xp-grid xp-grid-4" style="gap:4px;">
+                    @for (int m = 1; m <= Math.Min(currentMonth, 12); m++)
+                    {
+                    <a href="/Report/DownloadExcel?month=@m&year=@currentYear"
+                       class="xp-btn" style="height:20px; font-size:10px; padding:0 4px; text-align:center; justify-content:center;">
+                        @turkishMonths[m]
+                    </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Rapor hakkında bilgi penceresi *@
+    <div class="xp-window">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">ℹ️</span>
+            <span class="xp-titlebar-text">Excel Raporu Özellikleri</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <div style="font-size:11px; line-height:1.8;">
+                <div style="margin-bottom:8px;">İndirilen Excel dosyası şunları içerir:</div>
+
+                <div style="display:flex; align-items:flex-start; gap:6px; margin-bottom:6px;">
+                    <span>✅</span>
+                    <span>Başlık, kullanıcı adı ve oluşturulma tarihi</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:6px; margin-bottom:6px;">
+                    <span>✅</span>
+                    <span>Tüm işlemler (Tarih, Kategori, Tür, Açıklama, Tutar)</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:6px; margin-bottom:6px;">
+                    <span style="color:green;">🟩</span>
+                    <span>Gelir satırları <strong>yeşil</strong>, gider satırları <strong>kırmızı</strong> renkli</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:6px; margin-bottom:6px;">
+                    <span>✅</span>
+                    <span>Alt kısımda Toplam Gelir, Gider ve Net Bakiye özeti</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:6px;">
+                    <span>✅</span>
+                    <span>Türkçe para formatı (₺)</span>
+                </div>
+            </div>
+
+            <div class="xp-groupbox" style="margin-top:12px; background:#FFFAEE; border-color:#CCAA44;">
+                <span class="xp-groupbox-title">⚠️ Not</span>
+                <div style="font-size:10px; color:#666;">
+                    Excel dosyasını açmak için Microsoft Excel veya LibreOffice Calc kullanınız.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

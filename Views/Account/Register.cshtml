@@ -1,0 +1,88 @@
+@* ============================================================
+   Account/Register.cshtml - Kayıt Ekranı
+   ============================================================ *@
+@model KurusMatik.ViewModels.RegisterViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Kayıt Ol";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>KuruşMatik - Kayıt</title>
+    <link rel="stylesheet" href="~/css/xp.css" />
+    <style>
+        .xp-login-window { animation: xpAppear 0.3s ease; width: 420px; }
+        @@keyframes xpAppear { from { transform:scale(0.92); opacity:0; } to { transform:scale(1); opacity:1; } }
+    </style>
+</head>
+<body>
+<div class="xp-login-desktop">
+
+    <div style="text-align:center; color:white; margin-bottom:8px;">
+        <div style="font-size:48px;">💰</div>
+        <h1 style="font-family:Tahoma; font-size:20px; text-shadow:2px 2px 6px rgba(0,0,0,.5);">KuruşMatik</h1>
+        <p style="font-size:11px; opacity:.8;">Yeni Hesap Oluştur</p>
+    </div>
+
+    <div class="xp-login-window">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">👤</span>
+            <span class="xp-titlebar-text">Yeni Hesap Oluştur - KuruşMatik</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body" style="padding:16px;">
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="xp-alert xp-alert-danger">
+                    <span class="xp-alert-icon">❌</span>
+                    <div>@string.Join(" ", ViewData.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))</div>
+                </div>
+            }
+
+            <form asp-action="Register" asp-controller="Account" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="xp-grid xp-grid-2" style="gap:8px;">
+                    <div class="xp-form-group">
+                        <label class="xp-label" asp-for="FirstName">Ad</label>
+                        <input asp-for="FirstName" class="xp-input" placeholder="Adınız" />
+                        <span asp-validation-for="FirstName" class="xp-field-error"></span>
+                    </div>
+                    <div class="xp-form-group">
+                        <label class="xp-label" asp-for="LastName">Soyad</label>
+                        <input asp-for="LastName" class="xp-input" placeholder="Soyadınız" />
+                        <span asp-validation-for="LastName" class="xp-field-error"></span>
+                    </div>
+                </div>
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Email">📧 E-posta</label>
+                    <input asp-for="Email" class="xp-input" type="email" placeholder="ornek@email.com" />
+                    <span asp-validation-for="Email" class="xp-field-error"></span>
+                </div>
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Password">🔑 Şifre <span style="font-weight:normal; color:#666;">(en az 6 karakter)</span></label>
+                    <input asp-for="Password" class="xp-input" type="password" />
+                    <span asp-validation-for="Password" class="xp-field-error"></span>
+                </div>
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="ConfirmPassword">🔑 Şifre Tekrar</label>
+                    <input asp-for="ConfirmPassword" class="xp-input" type="password" />
+                    <span asp-validation-for="ConfirmPassword" class="xp-field-error"></span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+                    <a href="/Account/Login" style="font-size:11px; color:var(--xp-link);">← Zaten hesabım var</a>
+                    <button type="submit" class="xp-btn xp-btn-primary">✅ Kayıt Ol</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

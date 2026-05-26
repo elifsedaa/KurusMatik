@@ -1,0 +1,115 @@
+@* ============================================================
+   Transaction/Create.cshtml - Yeni İşlem Ekleme
+   Burası detaylı form. Dashboard'daki hızlı form yetersiz
+   kalınca kullanıcı buraya geçsin.
+   ============================================================ *@
+@model KurusMatik.ViewModels.TransactionViewModel
+@{
+    ViewData["Title"] = "Yeni İşlem";
+}
+
+<div style="max-width:500px; margin:0 auto;">
+    <div class="xp-window">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">➕</span>
+            <span class="xp-titlebar-text">Yeni İşlem Ekle</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close" onclick="location.href='/Transaction'">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body">
+
+            <form asp-action="Create" asp-controller="Transaction" method="post"
+                  id="create-form" onsubmit="validateForm(event)">
+                @Html.AntiForgeryToken()
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Amount">💰 Tutar (₺) <span style="color:red;">*</span></label>
+                    <input asp-for="Amount" class="xp-input" type="number" step="0.01" min="0.01"
+                           placeholder="0.00" id="amount-input" />
+                    <span asp-validation-for="Amount" class="xp-field-error"></span>
+                    <span id="amount-client-error" class="xp-field-error" style="display:none;">
+                        Tutar 0'dan büyük olmalıdır! Negatif değer girilemez.
+                    </span>
+                </div>
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="CategoryId">📂 Kategori <span style="color:red;">*</span></label>
+                    <select asp-for="CategoryId" class="xp-select" id="cat-select">
+                        <option value="">— Kategori seçin —</option>
+                        @{
+                            var gelirler = Model.AvailableCategories.Where(c => c.Type == CategoryType.Gelir);
+                            var giderler = Model.AvailableCategories.Where(c => c.Type == CategoryType.Gider);
+                        }
+                        @if (gelirler.Any())
+                        {
+                            <optgroup label="💚 GELİR KATEGORİLERİ">
+                                @foreach (var cat in gelirler)
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </optgroup>
+                        }
+                        @if (giderler.Any())
+                        {
+                            <optgroup label="❤️ GİDER KATEGORİLERİ">
+                                @foreach (var cat in giderler)
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                    <span asp-validation-for="CategoryId" class="xp-field-error"></span>
+                </div>
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Date">📅 Tarih <span style="color:red;">*</span></label>
+                    <input asp-for="Date" class="xp-input" type="date" />
+                    <span asp-validation-for="Date" class="xp-field-error"></span>
+                </div>
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Description">📝 Açıklama</label>
+                    <input asp-for="Description" class="xp-input" placeholder="İsteğe bağlı açıklama..." />
+                    <span asp-validation-for="Description" class="xp-field-error"></span>
+                </div>
+
+                <div class="xp-groupbox" style="background:#FFFAEE; border-color:#CCAA44;">
+                    <span class="xp-groupbox-title">⚠️ Hatırlatma</span>
+                    <div style="font-size:10px; color:#666; line-height:1.5;">
+                        Gelir için <strong>Gelir kategorisi</strong>, gider için <strong>Gider kategorisi</strong> seçin.
+                        Tutar daima <strong>pozitif</strong> girilmelidir.
+                    </div>
+                </div>
+
+                <div class="xp-flex-end mt-8">
+                    <a href="/Transaction" class="xp-btn">✖ İptal</a>
+                    <button type="submit" class="xp-btn xp-btn-primary">💾 Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Client-side validasyon: tutar negatif girilmesin, kategori seçilsin
+function validateForm(e) {
+    let valid = true;
+    const amount = parseFloat(document.getElementById('amount-input').value);
+    const catEr  = document.getElementById('amount-client-error');
+
+    if (isNaN(amount) || amount <= 0) {
+        catEr.style.display = 'block';
+        document.getElementById('amount-input').style.border = '2px solid red';
+        valid = false;
+    } else {
+        catEr.style.display = 'none';
+        document.getElementById('amount-input').style.border = '';
+    }
+
+    if (!valid) e.preventDefault();
+}
+</script>
+}

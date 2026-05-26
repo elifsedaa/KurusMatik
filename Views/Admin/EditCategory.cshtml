@@ -1,0 +1,54 @@
+@model KurusMatik.Models.Category
+@{
+    ViewData["Title"] = "Kategori Düzenle";
+}
+<div style="max-width:460px; margin:0 auto;">
+    <div class="xp-window">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">✏️</span>
+            <span class="xp-titlebar-text">Kategori Düzenle — @Model.Name</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close" onclick="location.href='/Admin/Categories'">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <form asp-action="EditCategory" asp-controller="Admin" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id" type="hidden" />
+
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Name">Kategori Adı</label>
+                    <input asp-for="Name" class="xp-input" />
+                    <span asp-validation-for="Name" class="xp-field-error"></span>
+                </div>
+                <div class="xp-form-group">
+                    <label class="xp-label">Tür</label>
+                    <input value="@Model.Type" class="xp-input" disabled style="background:#EEE; color:#666;" />
+                    <span style="font-size:10px; color:#888;">Tür değiştirilemez (mevcut işlemler etkilenir)</span>
+                </div>
+                <div class="xp-form-group">
+                    <label class="xp-label" asp-for="Description">Açıklama</label>
+                    <input asp-for="Description" class="xp-input" />
+                </div>
+                <div class="xp-grid xp-grid-2" style="gap:8px;">
+                    <div class="xp-form-group">
+                        <label class="xp-label" asp-for="ColorHex">Renk</label>
+                        <input asp-for="ColorHex" class="xp-input" type="color" style="height:22px; padding:1px;" />
+                    </div>
+                    <div class="xp-form-group">
+                        <label class="xp-label" asp-for="IconClass">İkon</label>
+                        <input asp-for="IconClass" class="xp-input" />
+                    </div>
+                </div>
+                <div class="xp-form-group" style="display:flex; align-items:center; gap:6px;">
+                    <input asp-for="IsActive" type="checkbox" />
+                    <label asp-for="IsActive" style="font-size:11px;">Aktif</label>
+                </div>
+                <div class="xp-flex-end mt-8">
+                    <a href="/Admin/Categories" class="xp-btn">✖ İptal</a>
+                    <button type="submit" class="xp-btn xp-btn-primary">💾 Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,85 @@
+@* BudgetGoal/Index.cshtml *@
+@model IEnumerable<KurusMatik.Models.BudgetGoal>
+@{
+    ViewData["Title"] = "Bütçe Hedefleri";
+}
+
+<div class="xp-flex-between mb-8">
+    <div style="color:white; font-weight:bold; font-size:13px; text-shadow:1px 1px 2px rgba(0,0,0,.5);">
+        🎯 Bütçe Hedefleri
+    </div>
+    <a href="/BudgetGoal/Create" class="xp-btn xp-btn-success">➕ Yeni Hedef</a>
+</div>
+
+<div class="xp-window">
+    <div class="xp-titlebar">
+        <span class="xp-titlebar-icon">🎯</span>
+        <span class="xp-titlebar-text">Bütçe Hedeflerim (@Model.Count() adet)</span>
+        <div class="xp-titlebar-buttons">
+            <div class="xp-win-btn xp-win-btn-close">✕</div>
+        </div>
+    </div>
+    <div class="xp-window-body" style="padding:0;">
+        @if (Model.Any())
+        {
+            <table class="xp-table">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th class="text-right">Aylık Limit</th>
+                        <th>Başlangıç</th>
+                        <th>Bitiş</th>
+                        <th style="text-align:center;">Durum</th>
+                        <th style="text-align:center; width:100px;">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var goal in Model)
+                    {
+                        <tr style="opacity: @(goal.IsActive ? "1" : "0.5")">
+                            <td>
+                                <span style="display:inline-block; width:8px; height:8px; border-radius:50%;
+                                             background:@goal.Category?.ColorHex; margin-right:4px;"></span>
+                                @goal.Category?.Name
+                            </td>
+                            <td class="text-right text-bold">@goal.MonthlyLimit.ToString("N2") ₺</td>
+                            <td style="font-size:10px; color:#666;">@goal.StartDate.ToString("dd.MM.yyyy")</td>
+                            <td style="font-size:10px; color:#666;">@(goal.EndDate?.ToString("dd.MM.yyyy") ?? "Süresiz")</td>
+                            <td style="text-align:center;">
+                                <span class="xp-badge @(goal.IsActive ? "xp-badge-income" : "xp-badge-expense")">
+                                    @(goal.IsActive ? "Aktif" : "Pasif")
+                                </span>
+                            </td>
+                            <td style="text-align:center;">
+                                <form asp-action="Toggle" asp-controller="BudgetGoal" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@goal.Id" />
+                                    <button type="submit" class="xp-btn" style="height:18px; padding:0 6px; font-size:10px; min-width:auto;"
+                                            title="@(goal.IsActive ? "Pasife al" : "Aktife al")">
+                                        @(goal.IsActive ? "⏸" : "▶")
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" asp-controller="BudgetGoal" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bu hedefi silmek istediğinizden emin misiniz?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@goal.Id" />
+                                    <button type="submit" class="xp-btn xp-btn-danger" style="height:18px; padding:0 6px; font-size:10px; min-width:auto;">🗑</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div style="padding:24px; text-align:center; color:#666;">
+                <div style="font-size:32px; margin-bottom:8px;">🎯</div>
+                <div>Henüz bütçe hedefi oluşturmadınız.</div>
+                <a href="/BudgetGoal/Create" class="xp-btn xp-btn-primary" style="margin-top:8px; display:inline-block;">
+                    ➕ İlk Hedefi Oluştur
+                </a>
+            </div>
+        }
+    </div>
+</div>

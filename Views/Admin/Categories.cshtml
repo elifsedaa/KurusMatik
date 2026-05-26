@@ -1,0 +1,67 @@
+@model IEnumerable<KurusMatik.Models.Category>
+@{
+    ViewData["Title"] = "Kategori Yönetimi";
+}
+
+<div class="xp-flex-between mb-8">
+    <div style="color:white; font-weight:bold; font-size:13px; text-shadow:1px 1px 2px rgba(0,0,0,.5);">
+        📂 Kategori Yönetimi
+    </div>
+    <a href="/Admin/CreateCategory" class="xp-btn xp-btn-success">➕ Yeni Kategori</a>
+</div>
+
+<div class="xp-window">
+    <div class="xp-titlebar">
+        <span class="xp-titlebar-icon">📂</span>
+        <span class="xp-titlebar-text">Kategoriler (@Model.Count() adet)</span>
+        <div class="xp-titlebar-buttons"><div class="xp-win-btn xp-win-btn-close">✕</div></div>
+    </div>
+    <div class="xp-window-body" style="padding:0;">
+        <table class="xp-table">
+            <thead>
+                <tr>
+                    <th>Renk</th>
+                    <th>Ad</th>
+                    <th>Tür</th>
+                    <th>Açıklama</th>
+                    <th style="text-align:center;">Durum</th>
+                    <th style="text-align:center; width:120px;">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cat in Model)
+                {
+                    <tr style="opacity:@(cat.IsActive ? "1" : "0.5")">
+                        <td>
+                            <div style="width:20px; height:20px; background:@cat.ColorHex;
+                                         border:1px solid #ACA899; border-radius:2px;"></div>
+                        </td>
+                        <td><strong>@cat.Name</strong></td>
+                        <td>
+                            <span class="xp-badge @(cat.Type == CategoryType.Gelir ? "xp-badge-income" : "xp-badge-expense")">
+                                @cat.Type
+                            </span>
+                        </td>
+                        <td style="color:#666; font-size:10px;">@(cat.Description ?? "—")</td>
+                        <td style="text-align:center;">
+                            <span class="xp-badge @(cat.IsActive ? "xp-badge-income" : "xp-badge-warning")">
+                                @(cat.IsActive ? "Aktif" : "Pasif")
+                            </span>
+                        </td>
+                        <td style="text-align:center;">
+                            <a href="/Admin/EditCategory/@cat.Id" class="xp-btn" style="height:18px; padding:0 6px; font-size:10px; min-width:auto;">✏️</a>
+                            <form asp-action="ToggleCategoryStatus" asp-controller="Admin" method="post" style="display:inline;"
+                                  asp-route-id="@cat.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="xp-btn @(cat.IsActive ? "xp-btn-danger" : "xp-btn-success")"
+                                        style="height:18px; padding:0 6px; font-size:10px; min-width:auto;">
+                                    @(cat.IsActive ? "⏸" : "▶")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
