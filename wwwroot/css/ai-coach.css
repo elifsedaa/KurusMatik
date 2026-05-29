@@ -1,0 +1,189 @@
+/* KuruþMatik AI Coach V2 Stilleri */
+/* Windows XP ruhu korunuyor ama biraz daha karakterli */
+
+.ai-coach-window {
+    margin-top: 16px;
+    border: 2px solid #7F9DB9;
+}
+
+/* Finansal Skor Alaný */
+.ai-score-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #EFF5FF;
+    border-bottom: 1px solid #C8D8E8;
+    flex-wrap: wrap;
+}
+
+.ai-score-label {
+    font-family: Tahoma, sans-serif;
+    font-size: 11px;
+    color: #444;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.ai-score-value {
+    font-family: Tahoma, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 80px;
+}
+
+    .ai-score-value.score-good {
+        color: #2A7A2A;
+    }
+
+    .ai-score-value.score-warning {
+        color: #AA7700;
+    }
+
+    .ai-score-value.score-danger {
+        color: #CC2020;
+    }
+
+.ai-score-track {
+    flex: 1;
+    height: 10px;
+    background: #D0D8E8;
+    border: 1px solid #9AAABB;
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 80px;
+}
+
+.ai-score-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+}
+
+.score-fill-good {
+    background: linear-gradient(to right, #4CAF50, #2A7A2A);
+}
+
+.score-fill-warning {
+    background: linear-gradient(to right, #FFC107, #AA7700);
+}
+
+.score-fill-danger {
+    background: linear-gradient(to right, #FF6B6B, #CC2020);
+}
+
+/* Ana Mesaj Alaný */
+.ai-main-message {
+    padding: 12px 14px;
+    font-family: Tahoma, sans-serif;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: #222;
+    min-height: 52px;
+    border-bottom: 1px solid #E0E8F0;
+}
+
+/* Yazýyor animasyonu */
+.ai-typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+    .ai-typing-indicator span {
+        width: 7px;
+        height: 7px;
+        background: #7F9DB9;
+        border-radius: 50%;
+        animation: typingBounce 1.2s infinite ease-in-out;
+    }
+
+        .ai-typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .ai-typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+@keyframes typingBounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    30% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
+}
+
+/* Insight Kartlarý */
+.ai-insight-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 6px;
+    padding: 10px 12px;
+}
+
+.ai-insight-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+    font-family: Tahoma, sans-serif;
+    font-size: 10.5px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: default;
+}
+
+    .ai-insight-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    }
+
+/* Kart renkleri - XP renk paleti */
+.card-success {
+    background: #F0FFF0;
+    border-color: #6AAA6A;
+    color: #1A4A1A;
+}
+
+.card-warning {
+    background: #FFFAEE;
+    border-color: #CCAA44;
+    color: #4A3A00;
+}
+
+.card-danger {
+    background: #FFF0F0;
+    border-color: #CC2020;
+    color: #4A0000;
+}
+
+.card-info {
+    background: #EFF5FF;
+    border-color: #7F9DB9;
+    color: #1A2A4A;
+}
+
+.card-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.card-title {
+    font-weight: bold;
+    font-size: 10px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 2px;
+}
+
+.card-value {
+    font-size: 11px;
+    font-weight: bold;
+}

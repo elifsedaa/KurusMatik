@@ -245,69 +245,50 @@ window.deleteTransaction = async function (id, btn) {
 // Gerçek bir API çağrısı yerine, kullanıcının harcama verilerini
 // analiz edip yerel bir mantıkla tavsiye üretiyorum.
 // Hoca sunumda internet erişimi olmasa bile çalışsın diye böyle yaptım.
-window.loadAiCoach = function (totalIncome, totalExpense, categoryData) {
-    const el = document.getElementById('ai-coach-content');
-    const loadingEl = document.getElementById('ai-coach-loading');
-    if (!el) return;
 
-    // Yüklenme animasyonu göster
-    if (loadingEl) loadingEl.style.display = 'block';
-    el.style.display = 'none';
 
-    // Gerçek bir API çağrısı gibi küçük bir gecikme
-    setTimeout(() => {
-        const advice = generateFinancialAdvice(totalIncome, totalExpense, categoryData);
-        el.innerHTML = advice;
-        if (loadingEl) loadingEl.style.display = 'none';
-        el.style.display = 'block';
-        // Efekt için typewriter animasyonu
-        typeWriter(el, advice, 0);
-    }, 1200);
-};
+//
 
 // Harcama verisine göre tavsiye üret
 
 //versiyon2
 
-// generateFinancialAdvice fonksiyonunu bu şekilde güncelle
-function generateFinancialAdvice(income, expense, categories) {
-    // Önce bakiyeyi burada hesaplıyorum, dışarıdan gelen veriyle karışmasın
-    const balance = income - expense;
+// AI Coach artık backend'den hazır geliyor, burada sadece görsel efektler var
+// Hesap mantığı FinancialAnalysisService.cs'e taşındı — parse hatası riski yok
 
-    // Hata buradaydı: eskiden income/income gibi bir şey yapıyordu olasılıkla
-    // Doğru hesap: net bakiye / toplam gelir
-    const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
+function typeWriterEffect(elementId, text) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
 
-    const tips = [];
+    // Typing indicator'ı gizle
+    const indicator = el.querySelector('.ai-typing-indicator');
+    if (indicator) indicator.style.display = 'none';
 
-    if (income === 0) {
-        tips.push(`📊 Bu ay henüz gelir girişi yapılmamış. Gelirlerinizi ekleyerek daha doğru analiz yapabilirim.`);
-    } else if (savingsRate < 0) {
-        tips.push(`🚨 <strong>Dikkat!</strong> Bu ay gelirinizin <strong>%${Math.abs(savingsRate)}</strong> fazlasını harcadınız. Harcamaları kısıtlamak için bazı kategorileri gözden geçirin.`);
-    } else if (savingsRate < 10) {
-        tips.push(`⚠️ Tasarruf oranınız <strong>%${savingsRate}</strong> — bu oldukça düşük. Finansal uzmanlar en az %20 tasarruf önerir.`);
-    } else if (savingsRate < 20) {
-        tips.push(`👍 Tasarruf oranınız <strong>%${savingsRate}</strong>. İyi bir başlangıç, biraz daha artırabilirsiniz.`);
-    } else {
-        tips.push(`🏆 Harika! Gelirinizin <strong>%${savingsRate}</strong>'ini biriktiriyorsunuz. Finansal hedeflerinize yaklaşıyorsunuz!`);
+    // Metni karakter karakter yazdır
+    let i = 0;
+    const textNode = document.createElement('span');
+    el.appendChild(textNode);
+
+    function step() {
+        if (i < text.length) {
+            // HTML tag'larını direkt geç, sadece görünür karakterleri animasyonla
+            if (text[i] === '<') {
+                const closeIdx = text.indexOf('>', i);
+                textNode.innerHTML = text.substring(0, closeIdx + 1);
+                i = closeIdx + 1;
+            } else {
+                textNode.innerHTML = text.substring(0, i + 1);
+                i++;
+            }
+            const delay = '.!?'.includes(text[i]) ? 60 : 18;
+            setTimeout(step, delay);
+        }
     }
 
-    if (categories && categories.length > 0) {
-        const topCat = categories.reduce((a, b) => a.totalAmount > b.totalAmount ? a : b);
-        // Yüzdeyi gelire göre hesapla, gidere göre değil
-        const pct = income > 0 ? ((topCat.totalAmount / income) * 100).toFixed(0) : 0;
-        tips.push(`💡 En yüksek harcamanız <strong>${topCat.categoryName}</strong> kategorisinde (${formatMoney(topCat.totalAmount)} ₺ — gelirinizin %${pct}'i).`);
-    }
-
-    const generalTips = [
-        '📌 50/30/20 kuralını deneyin: gelirinizin %50\'si ihtiyaçlar, %30\'u istekler, %20\'si tasarruf.',
-        '📌 Küçük harcamaların toplamı çoğu zaman büyük faturalardan fazla olur — kahve, abonelikler gibi.',
-        '📌 Beklenmedik giderler için gelirin %3\'ü kadar acil fon oluşturmanı öneririm.',
-    ];
-    tips.push(generalTips[Math.floor(Math.random() * generalTips.length)]);
-
-    return tips.join('<br><br>');
+    // Küçük gecikmeyle başlat, XP hissi için
+    setTimeout(step, 800);
 }
+
 
 //function generateFinancialAdvice(income, expense, categories) {
 //    const balance = income - expense;

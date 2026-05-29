@@ -6,6 +6,7 @@ using KurusMatik.Data;
 using KurusMatik.Models;
 using KurusMatik.ViewModels;
 using System.Globalization;
+using KurusMatik.Services;
 
 namespace KurusMatik.Controllers
 {
@@ -15,11 +16,16 @@ namespace KurusMatik.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly FinancialAnalysisService _analysisService;
 
-        public DashboardController(AppDbContext context, UserManager<ApplicationUser> userManager)
+
+
+        public DashboardController(AppDbContext context, UserManager<ApplicationUser> userManager,
+            FinancialAnalysisService analysisService)
         {
             _context = context;
             _userManager = userManager;
+            _analysisService = analysisService;
         }
 
         // Ana dashboard sayfası - burada LINQ sorgularım var
@@ -93,6 +99,12 @@ namespace KurusMatik.Controllers
             // --- LINQ SORGUSU 5: Bütçe hedeflerini kontrol ediyorum ---
             var budgetAlerts = await GetBudgetAlertsAsync(userId, selectedMonth, selectedYear);
 
+            // --- AI Coach analizi: backend'de hesaplanıyor ---
+            // Frontend'e decimal gönderiyorum, string parse sorunu olmayacak
+            var financialInsight = await _analysisService.AnalyzeAsync(
+                userId, selectedMonth, selectedYear,
+                monthlyTransactions, budgetAlerts);
+
             // --- LINQ SORGUSU 6: Son 6 ayın trend verisi ---
             // Bu sorguyu biraz daha karmaşık yapmak zorunda kaldım
             var monthlyTrend = await GetMonthlyTrendAsync(userId, selectedYear);
@@ -108,7 +120,8 @@ namespace KurusMatik.Controllers
                 CategoryIncomes = categoryIncomes,
                 RecentTransactions = recentTransactions,
                 BudgetAlerts = budgetAlerts,
-                MonthlyTrend = monthlyTrend
+                MonthlyTrend = monthlyTrend,
+                FinancialInsight = financialInsight
             };
 
             return View(viewModel);

@@ -316,29 +316,29 @@ async function submitQuickForm(e) {
     </div>
 
     @* SAĞ: Hızlı İşlem + AI Coach + Bütçe Uyarıları *@
-    <div>
+<div>
 
-        @* HIZLI İŞLEM EKLEME *@
-        <div class="xp-window mb-8">
-            <div class="xp-titlebar">
-                <span class="xp-titlebar-icon">➕</span>
-                <span class="xp-titlebar-text">Hızlı İşlem Ekle</span>
-                <div class="xp-titlebar-buttons">
-                    <div class="xp-win-btn xp-win-btn-close">✕</div>
-                </div>
+    @* HIZLI İŞLEM EKLEME *@
+    <div class="xp-window mb-8">
+        <div class="xp-titlebar">
+            <span class="xp-titlebar-icon">➕</span>
+            <span class="xp-titlebar-text">Hızlı İşlem Ekle</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close">✕</div>
             </div>
-            <div class="xp-window-body">
-                <form id="quick-transaction-form" onsubmit="submitQuickForm(event)">
-                    @Html.AntiForgeryToken()
-                    <div class="xp-form-group">
-                        <label class="xp-label">Tutar (₺)</label>
-                        <input name="Amount" type="number" step="0.01" min="0.01"
-                               class="xp-input" placeholder="0.00" required />
-                    </div>
-                    <div class="xp-form-group">
-                        <label class="xp-label">Kategori</label>
-                        <select name="CategoryId" class="xp-select">
-                            @{
+        </div>
+        <div class="xp-window-body">
+            <form id="quick-transaction-form" onsubmit="submitQuickForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="xp-form-group">
+                    <label class="xp-label">Tutar (₺)</label>
+                    <input name="Amount" type="number" step="0.01" min="0.01"
+                           class="xp-input" placeholder="0.00" required />
+                </div>
+                <div class="xp-form-group">
+                    <label class="xp-label">Kategori</label>
+                    <select name="CategoryId" class="xp-select">
+                        @{
                                 // Kategori listesini son işlemlerden çekiyorum
                                 var cats = Model.RecentTransactions
                                     .Select(t => t.Category)
@@ -346,94 +346,129 @@ async function submitQuickForm(e) {
                                     .GroupBy(c => c!.Id)
                                     .Select(g => g.First())
                                     .ToList();
-                            }
-                            @* Eğer son işlem yoksa en azından bir kategori seçeneği göster *@
-                            @if (!cats.Any())
+                        }
+                        @* Eğer son işlem yoksa en azından bir kategori seçeneği göster *@
+                        @if (!cats.Any())
                             {
-                            <option value="">— Kategori seç —</option>
+                        <option value="">— Kategori seç —</option>
                             }
-                            @foreach (var cat in cats)
+                        @foreach (var cat in cats)
                             {
-                            <option value="@cat!.Id">@cat.Name</option>
+                        <option value="@cat!.Id">@cat.Name</option>
                             }
-                        </select>
-                    </div>
-                    <div class="xp-form-group">
-                        <label class="xp-label">Açıklama</label>
-                        <input name="Description" class="xp-input" placeholder="İsteğe bağlı..." />
-                    </div>
-                    <input name="Date" type="hidden" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                    <div class="xp-flex-end">
-                        <a href="/Transaction/Create" class="xp-btn" style="font-size:10px;">Detaylı Form</a>
-                        <button type="submit" class="xp-btn xp-btn-primary">💾 Kaydet</button>
-                    </div>
-                </form>
-            </div>
+                    </select>
+                </div>
+                <div class="xp-form-group">
+                    <label class="xp-label">Açıklama</label>
+                    <input name="Description" class="xp-input" placeholder="İsteğe bağlı..." />
+                </div>
+                <input name="Date" type="hidden" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <div class="xp-flex-end">
+                    <a href="/Transaction/Create" class="xp-btn" style="font-size:10px;">Detaylı Form</a>
+                    <button type="submit" class="xp-btn xp-btn-primary">💾 Kaydet</button>
+                </div>
+            </form>
         </div>
-
-        @* AI COACH *@
-        <div class="xp-window mb-8">
-            <div class="xp-titlebar" style="background: linear-gradient(to bottom, #7B5EA7, #4A2080);">
-                <span class="xp-titlebar-icon">🤖</span>
-                <span class="xp-titlebar-text">Yapay Zeka Finans Koçu</span>
-                <div class="xp-titlebar-buttons">
-                    <div class="xp-win-btn xp-win-btn-close">✕</div>
-                </div>
-            </div>
-            <div class="xp-window-body">
-                <div class="xp-ai-coach">
-                    <div class="xp-ai-coach-header">
-                        <span class="robot-icon">🤖</span>
-                        <span>KuruşMatik AI Koçu — @turkishMonths[Model.SelectedMonth] Analizi</span>
-                    </div>
-                    <div id="ai-coach-loading" class="xp-ai-coach-content loading" style="display:none;">
-                        ⏳ Harcamalarınız analiz ediliyor<span class="ai-typing-cursor"></span>
-                    </div>
-                    <div id="ai-coach-content" class="xp-ai-coach-content">
-                        Yükleniyor...
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @* BÜTÇE UYARILARI *@
-        @if (Model.BudgetAlerts.Any())
-        {
-        <div class="xp-window">
-            <div class="xp-titlebar" style="background: linear-gradient(to bottom, #E8A900, #A07000);">
-                <span class="xp-titlebar-icon">⚠️</span>
-                <span class="xp-titlebar-text">Bütçe Uyarıları (@Model.BudgetAlerts.Count)</span>
-                <div class="xp-titlebar-buttons">
-                    <div class="xp-win-btn xp-win-btn-close">✕</div>
-                </div>
-            </div>
-            <div class="xp-window-body" style="padding:8px;">
-                @foreach (var alert in Model.BudgetAlerts)
-                    {
-                <div style="margin-bottom:8px;">
-                    <div class="xp-flex-between mb-8" style="font-size:11px;">
-                        <span style="font-weight:bold;">@alert.CategoryName</span>
-                        <span class="xp-badge xp-badge-@(alert.IsExceeded ? "expense" : "warning")">
-                            %@alert.UsagePercentage.ToString("N0")
-                        </span>
-                    </div>
-                    <div class="xp-progress">
-                        <div class="xp-progress-bar @(alert.AlertLevel)"
-                             style="width: @Math.Min(100, alert.UsagePercentage)%;"></div>
-                    </div>
-                    <div style="font-size:10px; color:#666; margin-top:2px;">
-                        @alert.CurrentSpending.ToString("N2") ₺ / @alert.MonthlyLimit.ToString("N2") ₺
-                        @if (alert.IsExceeded)
-                                {
-                        <span style="color:red; font-weight:bold;"> (Limit aşıldı!)</span>
-                                }
-                    </div>
-                </div>
-                    }
-            </div>
-        </div>
-        }
     </div>
+
+    @* AI Coach Paneli *@
+    <div class="xp-window ai-coach-window">
+        <div class="xp-title-bar">
+            <span>🤖 KuruşMatik AI Finans Koçu</span>
+        </div>
+        <div class="xp-window-body ai-coach-body">
+
+            @if (Model.FinancialInsight != null)
+        {
+            var insight = Model.FinancialInsight;
+
+            @* Finansal Skor *@
+            <div class="ai-score-bar">
+                <div class="ai-score-label">Finansal Skor</div>
+                <div class="ai-score-value score-@insight.ScoreLevel">
+                    @insight.ScoreEmoji @insight.FinancialScore<span style="font-size:12px;">/100</span>
+                </div>
+                <div class="ai-score-track">
+                    <div class="ai-score-fill score-fill-@insight.ScoreLevel"
+                         style="width: @insight.FinancialScore%"></div>
+                </div>
+            </div>
+
+            @* Ana Mesaj *@
+            <div class="ai-main-message" id="ai-main-message" data-message="@insight.MainMessage">
+                <div class="ai-typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+
+            @* Insight Kartları *@
+            <div class="ai-insight-cards">
+                @foreach (var card in insight.InsightCards)
+                {
+                <div class="ai-insight-card card-@card.Level">
+                    <span class="card-icon">@card.Icon</span>
+                    <div class="card-content">
+                        <div class="card-title">@card.Title</div>
+                        <div class="card-value">@card.Value</div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            @* JS'e sadece render için gerekli veriyi geçiriyorum *@
+            @* Sayıları InvariantCulture ile yazıyorum — parse sorunu ortadan kalkıyor *@
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const message = document.getElementById('ai-main-message').dataset.message;
+                    typeWriterEffect('ai-main-message', message);
+                });
+            </script>
+        }
+        else
+        {
+            <p style="padding: 12px; color: #666;">Analiz yükleniyor...</p>
+        }
+        </div>
+    </div>
+
+    @* BÜTÇE UYARILARI *@
+    @if (Model.BudgetAlerts.Any())
+        {
+    <div class="xp-window">
+        <div class="xp-titlebar" style="background: linear-gradient(to bottom, #E8A900, #A07000);">
+            <span class="xp-titlebar-icon">⚠️</span>
+            <span class="xp-titlebar-text">Bütçe Uyarıları (@Model.BudgetAlerts.Count)</span>
+            <div class="xp-titlebar-buttons">
+                <div class="xp-win-btn xp-win-btn-close">✕</div>
+            </div>
+        </div>
+        <div class="xp-window-body" style="padding:8px;">
+            @foreach (var alert in Model.BudgetAlerts)
+                    {
+            <div style="margin-bottom:8px;">
+                <div class="xp-flex-between mb-8" style="font-size:11px;">
+                    <span style="font-weight:bold;">@alert.CategoryName</span>
+                    <span class="xp-badge xp-badge-@(alert.IsExceeded ? "expense" : "warning")">
+                        %@alert.UsagePercentage.ToString("N0")
+                    </span>
+                </div>
+                <div class="xp-progress">
+                    <div class="xp-progress-bar @(alert.AlertLevel)"
+                         style="width: @Math.Min(100, alert.UsagePercentage)%;"></div>
+                </div>
+                <div style="font-size:10px; color:#666; margin-top:2px;">
+                    @alert.CurrentSpending.ToString("N2") ₺ / @alert.MonthlyLimit.ToString("N2") ₺
+                    @if (alert.IsExceeded)
+                                {
+                    <span style="color:red; font-weight:bold;"> (Limit aşıldı!)</span>
+                                }
+                </div>
+            </div>
+                    }
+        </div>
+    </div>
+        }
+</div>
 </div>
 
 @* ==========================================

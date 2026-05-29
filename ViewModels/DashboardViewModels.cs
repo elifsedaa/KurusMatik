@@ -28,6 +28,10 @@ namespace KurusMatik.ViewModels
 
         // Aylık gelir/gider trend verisi (son 6 ay) - çizgi grafik için
         public List<MonthlyTrendData> MonthlyTrend { get; set; } = new();
+
+        // AI Coach analiz sonucu - backend'de hesaplandı, JS parse hatası yok
+        public FinancialInsightViewModel? FinancialInsight { get; set; }
+
     }
 
     // Kategori bazlı özet için yardımcı sınıf

@@ -47,6 +47,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Excel servisimi DI konteynerine ekliyorum - Scoped veya Singleton olabilir
 builder.Services.AddScoped<ExcelExportService>();
 
+builder.Services.AddScoped<FinancialAnalysisService>();
+
 // MVC servisleri
 builder.Services.AddControllersWithViews();
 
