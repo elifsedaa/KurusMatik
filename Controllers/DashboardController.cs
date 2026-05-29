@@ -157,31 +157,65 @@ namespace KurusMatik.Controllers
 
         // --- YARDIMCI METOT: Aylık Trend Verisi ---
         // Son 6 ayın gelir-gider verilerini çizgi grafik için hazırlıyorum
+
+        //versiyon 2
+
+        // Tek sorguda tüm yılın verisini çek, sonra bellekte grupla
         private async Task<List<MonthlyTrendData>> GetMonthlyTrendAsync(string userId, int year)
         {
-            var trend = new List<MonthlyTrendData>();
             var turkishMonths = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-                                         "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+                                 "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
 
-            // Bu yılın her ayı için veri hesaplıyorum
+            // Tek sorgu - bu yılın tüm işlemleri
+            var allTransactions = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId && t.Date.Year == year)
+                .ToListAsync();
+
+            var trend = new List<MonthlyTrendData>();
+
             for (int m = 1; m <= DateTime.Now.Month; m++)
             {
-                var monthTransactions = await _context.Transactions
-                    .Include(t => t.Category)
-                    .Where(t => t.UserId == userId
-                             && t.Date.Month == m
-                             && t.Date.Year == year)
-                    .ToListAsync();
-
+                var monthData = allTransactions.Where(t => t.Date.Month == m).ToList();
                 trend.Add(new MonthlyTrendData
                 {
                     MonthLabel = turkishMonths[m],
-                    Income = monthTransactions.Where(t => t.Category?.Type == CategoryType.Gelir).Sum(t => t.Amount),
-                    Expense = monthTransactions.Where(t => t.Category?.Type == CategoryType.Gider).Sum(t => t.Amount)
+                    Income = monthData.Where(t => t.Category?.Type == CategoryType.Gelir).Sum(t => t.Amount),
+                    Expense = monthData.Where(t => t.Category?.Type == CategoryType.Gider).Sum(t => t.Amount)
                 });
             }
 
             return trend;
         }
+
+
+
+
+        //private async Task<List<MonthlyTrendData>> GetMonthlyTrendAsync(string userId, int year)
+        //{
+        //    var trend = new List<MonthlyTrendData>();
+        //    var turkishMonths = new[] { "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+        //                                 "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+
+        //    // Bu yılın her ayı için veri hesaplıyorum
+        //    for (int m = 1; m <= DateTime.Now.Month; m++)
+        //    {
+        //        var monthTransactions = await _context.Transactions
+        //            .Include(t => t.Category)
+        //            .Where(t => t.UserId == userId
+        //                     && t.Date.Month == m
+        //                     && t.Date.Year == year)
+        //            .ToListAsync();
+
+        //        trend.Add(new MonthlyTrendData
+        //        {
+        //            MonthLabel = turkishMonths[m],
+        //            Income = monthTransactions.Where(t => t.Category?.Type == CategoryType.Gelir).Sum(t => t.Amount),
+        //            Expense = monthTransactions.Where(t => t.Category?.Type == CategoryType.Gider).Sum(t => t.Amount)
+        //        });
+        //    }
+
+        //    return trend;
+        //}
     }
 }

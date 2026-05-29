@@ -266,16 +266,24 @@ window.loadAiCoach = function (totalIncome, totalExpense, categoryData) {
 };
 
 // Harcama verisine göre tavsiye üret
+
+//versiyon2
+
+// generateFinancialAdvice fonksiyonunu bu şekilde güncelle
 function generateFinancialAdvice(income, expense, categories) {
+    // Önce bakiyeyi burada hesaplıyorum, dışarıdan gelen veriyle karışmasın
     const balance = income - expense;
+
+    // Hata buradaydı: eskiden income/income gibi bir şey yapıyordu olasılıkla
+    // Doğru hesap: net bakiye / toplam gelir
     const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
+
     const tips = [];
 
-    // Tasarruf oranına göre genel yorum
     if (income === 0) {
         tips.push(`📊 Bu ay henüz gelir girişi yapılmamış. Gelirlerinizi ekleyerek daha doğru analiz yapabilirim.`);
     } else if (savingsRate < 0) {
-        tips.push(`🚨 <strong>Dikkat!</strong> Bu ay gelirinizin <strong>${Math.abs(savingsRate)}%</strong> fazlasını harcadınız. Harcamaları kısıtlamak için bazı kategorileri gözden geçirin.`);
+        tips.push(`🚨 <strong>Dikkat!</strong> Bu ay gelirinizin <strong>%${Math.abs(savingsRate)}</strong> fazlasını harcadınız. Harcamaları kısıtlamak için bazı kategorileri gözden geçirin.`);
     } else if (savingsRate < 10) {
         tips.push(`⚠️ Tasarruf oranınız <strong>%${savingsRate}</strong> — bu oldukça düşük. Finansal uzmanlar en az %20 tasarruf önerir.`);
     } else if (savingsRate < 20) {
@@ -284,14 +292,13 @@ function generateFinancialAdvice(income, expense, categories) {
         tips.push(`🏆 Harika! Gelirinizin <strong>%${savingsRate}</strong>'ini biriktiriyorsunuz. Finansal hedeflerinize yaklaşıyorsunuz!`);
     }
 
-    // En yüksek harcama kategorisi varsa uyar
     if (categories && categories.length > 0) {
         const topCat = categories.reduce((a, b) => a.totalAmount > b.totalAmount ? a : b);
+        // Yüzdeyi gelire göre hesapla, gidere göre değil
         const pct = income > 0 ? ((topCat.totalAmount / income) * 100).toFixed(0) : 0;
         tips.push(`💡 En yüksek harcamanız <strong>${topCat.categoryName}</strong> kategorisinde (${formatMoney(topCat.totalAmount)} ₺ — gelirinizin %${pct}'i).`);
     }
 
-    // Genel finans tavsiyesi
     const generalTips = [
         '📌 50/30/20 kuralını deneyin: gelirinizin %50\'si ihtiyaçlar, %30\'u istekler, %20\'si tasarruf.',
         '📌 Küçük harcamaların toplamı çoğu zaman büyük faturalardan fazla olur — kahve, abonelikler gibi.',
@@ -301,6 +308,42 @@ function generateFinancialAdvice(income, expense, categories) {
 
     return tips.join('<br><br>');
 }
+
+//function generateFinancialAdvice(income, expense, categories) {
+//    const balance = income - expense;
+//    const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
+//    const tips = [];
+
+//    // Tasarruf oranına göre genel yorum
+//    if (income === 0) {
+//        tips.push(`📊 Bu ay henüz gelir girişi yapılmamış. Gelirlerinizi ekleyerek daha doğru analiz yapabilirim.`);
+//    } else if (savingsRate < 0) {
+//        tips.push(`🚨 <strong>Dikkat!</strong> Bu ay gelirinizin <strong>${Math.abs(savingsRate)}%</strong> fazlasını harcadınız. Harcamaları kısıtlamak için bazı kategorileri gözden geçirin.`);
+//    } else if (savingsRate < 10) {
+//        tips.push(`⚠️ Tasarruf oranınız <strong>%${savingsRate}</strong> — bu oldukça düşük. Finansal uzmanlar en az %20 tasarruf önerir.`);
+//    } else if (savingsRate < 20) {
+//        tips.push(`👍 Tasarruf oranınız <strong>%${savingsRate}</strong>. İyi bir başlangıç, biraz daha artırabilirsiniz.`);
+//    } else {
+//        tips.push(`🏆 Harika! Gelirinizin <strong>%${savingsRate}</strong>'ini biriktiriyorsunuz. Finansal hedeflerinize yaklaşıyorsunuz!`);
+//    }
+
+//    // En yüksek harcama kategorisi varsa uyar
+//    if (categories && categories.length > 0) {
+//        const topCat = categories.reduce((a, b) => a.totalAmount > b.totalAmount ? a : b);
+//        const pct = income > 0 ? ((topCat.totalAmount / income) * 100).toFixed(0) : 0;
+//        tips.push(`💡 En yüksek harcamanız <strong>${topCat.categoryName}</strong> kategorisinde (${formatMoney(topCat.totalAmount)} ₺ — gelirinizin %${pct}'i).`);
+//    }
+
+//    // Genel finans tavsiyesi
+//    const generalTips = [
+//        '📌 50/30/20 kuralını deneyin: gelirinizin %50\'si ihtiyaçlar, %30\'u istekler, %20\'si tasarruf.',
+//        '📌 Küçük harcamaların toplamı çoğu zaman büyük faturalardan fazla olur — kahve, abonelikler gibi.',
+//        '📌 Beklenmedik giderler için gelirin %3\'ü kadar acil fon oluşturmanı öneririm.',
+//    ];
+//    tips.push(generalTips[Math.floor(Math.random() * generalTips.length)]);
+
+//    return tips.join('<br><br>');
+//}
 
 // Yazı makinesi efekti (sadece görsel amaçlı)
 function typeWriter(el, html, i) {

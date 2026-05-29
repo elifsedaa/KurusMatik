@@ -40,11 +40,29 @@ document.addEventListener('DOMContentLoaded', function () {
     drawTrendLineChart();
 
     // AI Coach'u başlat - harcama verilerini gönderiyorum
+
+    //versiyon 2
+
+    // Index.cshtml içinde, Scripts section'ında
     loadAiCoach(
+        @Model.TotalIncome,   // Sadece gelir
+        @Model.TotalExpense,  // Sadece gider
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.CategoryExpenses.Select(c => new {
+                categoryName = c.CategoryName,
+                totalAmount = c.TotalAmount
+            })
+        ))
+);      
+
+
+    @*loadAiCoach(
         @Model.TotalIncome,
         @Model.TotalExpense,
         categoryExpenseData
-    );
+    );*@
+
+
 });
 
 // --- GİDER PASTA GRAFİĞİ ---

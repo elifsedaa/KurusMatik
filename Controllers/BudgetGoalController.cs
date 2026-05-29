@@ -49,12 +49,22 @@ namespace KurusMatik.Controllers
         }
 
         // Yeni bütçe hedefi oluşturma - POST
+
+        //versiyon 2
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(BudgetGoal model)
         {
             var userId = _userManager.GetUserId(User);
             if (userId == null) return Challenge();
+
+            // UserId'yi ÖNCE set ediyorum, sonra ModelState kontrolü yapıyorum
+            // Çünkü [Required] attribute'u validation sırasında UserId'nin dolu olmasını bekliyor
+            model.UserId = userId;
+
+            // UserId artık dolu olduğu için ModelState.IsValid doğru sonuç verecek
+            ModelState.Remove("UserId"); // Eğer zaten hata eklenmiş olursa temizle
 
             if (!ModelState.IsValid)
             {
@@ -64,7 +74,7 @@ namespace KurusMatik.Controllers
                 return View(model);
             }
 
-            // Aynı kategoride zaten aktif bir hedef var mı diye kontrol ediyorum
+            // Aynı kategoride aktif hedef var mı?
             var existingGoal = await _context.BudgetGoals
                 .FirstOrDefaultAsync(b => b.UserId == userId
                                        && b.CategoryId == model.CategoryId
@@ -78,7 +88,7 @@ namespace KurusMatik.Controllers
                 return View(model);
             }
 
-            model.UserId = userId;
+            // UserId zaten set edildi yukarıda, tekrar set etmeye gerek yok
             model.CreatedAt = DateTime.Now;
 
             _context.BudgetGoals.Add(model);
@@ -87,6 +97,46 @@ namespace KurusMatik.Controllers
             TempData["SuccessMessage"] = "Bütçe hedefi oluşturuldu!";
             return RedirectToAction(nameof(Index));
         }
+
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(BudgetGoal model)
+        //{
+        //    var userId = _userManager.GetUserId(User);
+        //    if (userId == null) return Challenge();
+
+        //    if (!ModelState.IsValid)
+        //    {
+        //        ViewBag.Categories = await _context.Categories
+        //            .Where(c => c.IsActive && c.Type == CategoryType.Gider)
+        //            .ToListAsync();
+        //        return View(model);
+        //    }
+
+        //    // Aynı kategoride zaten aktif bir hedef var mı diye kontrol ediyorum
+        //    var existingGoal = await _context.BudgetGoals
+        //        .FirstOrDefaultAsync(b => b.UserId == userId
+        //                               && b.CategoryId == model.CategoryId
+        //                               && b.IsActive);
+
+        //    if (existingGoal != null)
+        //    {
+        //        ModelState.AddModelError("CategoryId", "Bu kategori için zaten aktif bir bütçe hedefiniz var.");
+        //        ViewBag.Categories = await _context.Categories
+        //            .Where(c => c.IsActive && c.Type == CategoryType.Gider).ToListAsync();
+        //        return View(model);
+        //    }
+
+        //    model.UserId = userId;
+        //    model.CreatedAt = DateTime.Now;
+
+        //    _context.BudgetGoals.Add(model);
+        //    await _context.SaveChangesAsync();
+
+        //    TempData["SuccessMessage"] = "Bütçe hedefi oluşturuldu!";
+        //    return RedirectToAction(nameof(Index));
+        //}
 
         // Bütçe hedefini aktif/pasif yap
         [HttpPost]
