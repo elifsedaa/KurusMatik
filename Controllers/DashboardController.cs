@@ -53,11 +53,11 @@ namespace KurusMatik.Controllers
             // CategoryType.Gelir olanları Sum ile topluyorum
             var totalIncome = monthlyTransactions
                 .Where(t => t.Category?.Type == CategoryType.Gelir)
-                .AsEnumerable().Sum(t => (double)t.Amount);
+                .AsEnumerable().Sum(t => t.Amount);
 
             var totalExpense = monthlyTransactions
                 .Where(t => t.Category?.Type == CategoryType.Gider)
-                .AsEnumerable().Sum(t => (double)t.Amount);
+                .AsEnumerable().Sum(t => t.Amount);
 
             // --- LINQ SORGUSU 3: Kategori bazlı gider gruplandırması ---
             // Burada GroupBy kullandım, her kategori için toplam tutar hesaplıyorum
@@ -69,10 +69,10 @@ namespace KurusMatik.Controllers
                     CategoryName = g.Key.Name,
                     ColorHex = g.Key.ColorHex,
                     IconClass = g.Key.IconClass,
-                    TotalAmount = g.AsEnumerable().Sum(t => (double)t.Amount),
+                    TotalAmount = g.AsEnumerable().Sum(t => t.Amount),
                     TransactionCount = g.Count(),
                     // Yüzde hesabı: bu kategorinin toplam harcama içindeki payı
-                    Percentage = totalExpense > 0 ? Math.Round((g.AsEnumerable().Sum(t => (double)t.Amount) / totalExpense) * 100, 1) : 0
+                    Percentage = totalExpense > 0 ? Math.Round((g.AsEnumerable().Sum(t => t.Amount) / totalExpense) * 100, 1) : 0
                 })
                 .OrderByDescending(c => c.TotalAmount)
                 .ToList();
@@ -86,9 +86,9 @@ namespace KurusMatik.Controllers
                     CategoryName = g.Key.Name,
                     ColorHex = g.Key.ColorHex,
                     IconClass = g.Key.IconClass,
-                    TotalAmount = g.AsEnumerable().Sum(t => (double)t.Amount),
+                    TotalAmount = g.AsEnumerable().Sum(t => t.Amount),
                     TransactionCount = g.Count(),
-                    Percentage = totalIncome > 0 ? Math.Round((g.AsEnumerable().Sum(t => (double)t.Amount) / totalIncome) * 100, 1) : 0
+                    Percentage = totalIncome > 0 ? Math.Round((g.AsEnumerable().Sum(t => t.Amount) / totalIncome) * 100, 1) : 0
                 })
                 .OrderByDescending(c => c.TotalAmount)
                 .ToList();
@@ -144,13 +144,15 @@ namespace KurusMatik.Controllers
             foreach (var goal in budgetGoals)
             {
                 // Bu kategori için seçili aydaki harcamayı hesaplıyorum
-                var spending = await _context.Transactions
+                var spending = (await _context.Transactions
                     .Where(t => t.UserId == userId
                              && t.CategoryId == goal.CategoryId
                              && t.Date.Month == month
                              && t.Date.Year == year
                              && t.Category!.Type == CategoryType.Gider)
-                    .AsEnumerable().Sum(t => (double)t.Amount);
+                    .ToListAsync())
+                    .Sum(t => t.Amount);
+
 
                 alerts.Add(new BudgetAlertViewModel
                 {
@@ -193,8 +195,8 @@ namespace KurusMatik.Controllers
                 trend.Add(new MonthlyTrendData
                 {
                     MonthLabel = turkishMonths[m],
-                    Income = monthData.Where(t => t.Category?.Type == CategoryType.Gelir).AsEnumerable().Sum(t => (double)t.Amount),
-                    Expense = monthData.Where(t => t.Category?.Type == CategoryType.Gider).AsEnumerable().Sum(t => (double)t.Amount)
+                    Income = monthData.Where(t => t.Category?.Type == CategoryType.Gelir).AsEnumerable().Sum(t => t.Amount),
+                    Expense = monthData.Where(t => t.Category?.Type == CategoryType.Gider).AsEnumerable().Sum(t => t.Amount)
                 });
             }
 
