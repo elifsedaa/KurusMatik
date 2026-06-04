@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // EF Core ile SQL Server bağlantısını kuruyorum
 // Connection string'i appsettings.json'dan okuyorum
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ASP.NET Core Identity servislerini ekliyorum
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <!-- EF Core SQL Server paketi -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <!-- EF Core araçları (migration komutları için) -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
