@@ -64,7 +64,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    // Railway HTTPS'i kendisi hallediyor
+}
+else
+{
+    app.UseHttpsRedirection();
+}
+
+// app.UseHttpsRedirection();
 app.UseStaticFiles(); // wwwroot klasörü için
 
 app.UseRouting();
